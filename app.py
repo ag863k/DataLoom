@@ -1,6 +1,7 @@
 """
 DataLoom - Professional Analytics Dashboard
 Production-ready Streamlit application with secure authentication and database integration.
+GitHub: https://github.com/ag863k/DataLoom
 """
 import streamlit as st
 import pandas as pd
@@ -609,7 +610,7 @@ def show_upload_page():
         - E-commerce Data, IoT Sensor Data
         
         **How to get them:**
-        1. Download sample files from the DataLoom sample data collection
+        1. Visit the GitHub repository: https://github.com/ag863k/DataLoom
         2. Upload any `sample_*.csv` file here
         3. Start exploring your data analytics!
         
@@ -753,11 +754,13 @@ def show_analytics_page():
                 with col3:
                     st.metric("Missing Values", f"{summary['basic_info']['missing_values']:,}")
                 with col4:
-                    try:
-                        memory_mb = summary['basic_info']['memory_usage'] / (1024 * 1024)
-                        st.metric("Memory Usage", f"{memory_mb:.1f} MB")
-                    except (KeyError, TypeError, ZeroDivisionError):
-                        st.metric("Memory Usage", "N/A")
+                    total_cells = summary['basic_info']['rows'] * summary['basic_info']['columns']
+                    missing_cells = summary['basic_info']['missing_values']
+                    if total_cells > 0:
+                        completeness = ((total_cells - missing_cells) / total_cells) * 100
+                        st.metric("Data Quality", f"{completeness:.1f}%")
+                    else:
+                        st.metric("Data Quality", "N/A")
                 
                 # Data types
                 st.subheader("Column Types")

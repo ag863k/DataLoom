@@ -27,16 +27,10 @@ class DataAnalyzer:
         return datetime_cols
     
     def get_summary_stats(self) -> Dict[str, Any]:
-        try:
-            memory_usage = self.df.memory_usage(deep=True).sum()
-        except Exception:
-            memory_usage = 0
-            
         summary = {
             'basic_info': {
                 'rows': len(self.df),
                 'columns': len(self.df.columns),
-                'memory_usage': memory_usage,
                 'missing_values': self.df.isnull().sum().sum()
             },
             'column_types': {
@@ -299,11 +293,6 @@ class DataAnalyzer:
         report.append("-" * 20)
         report.append(f"Rows: {len(self.df):,}")
         report.append(f"Columns: {len(self.df.columns)}")
-        try:
-            memory_mb = self.df.memory_usage(deep=True).sum() / 1024 / 1024
-            report.append(f"Memory Usage: {memory_mb:.2f} MB")
-        except Exception:
-            report.append("Memory Usage: N/A")
         report.append("")
         
         # Column types
