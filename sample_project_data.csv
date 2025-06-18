@@ -1,0 +1,21 @@
+project_id,project_name,client_name,start_date,end_date,status,budget,actual_cost,project_manager,team_size,completion_percentage,priority,department
+P001,Website Redesign,TechCorp Inc,2024-01-01,2024-03-15,In Progress,25000,18750,Alice Johnson,5,75,High,IT
+P002,Mobile App Development,StartupXYZ,2023-12-01,2024-02-28,In Progress,45000,32500,Bob Smith,8,72,High,Development
+P003,Database Migration,FinanceFirst,2024-01-15,2024-04-30,Planning,15000,2000,Carol Williams,3,13,Medium,IT
+P004,Marketing Campaign,RetailPlus,2023-11-01,2024-01-31,Completed,12000,11200,David Brown,4,100,Low,Marketing
+P005,Security Audit,BankSecure,2024-02-01,2024-03-31,Planning,35000,3500,Emma Davis,6,10,High,Security
+P006,Cloud Migration,CloudFirst,2024-01-10,2024-05-15,In Progress,55000,22000,Frank Miller,7,40,High,IT
+P007,Training Program,EduTech,2023-10-15,2024-02-15,In Progress,8000,6400,Grace Wilson,2,80,Medium,HR
+P008,Product Launch,InnovateNow,2024-01-20,2024-06-30,Planning,75000,7500,Henry Moore,10,10,High,Product
+P009,System Integration,ConnectAll,2023-12-15,2024-03-30,In Progress,28000,16800,Ivy Taylor,5,60,Medium,IT
+P010,User Research,UXDesign,2024-02-01,2024-04-15,Planning,18000,1800,Jack Anderson,3,10,Medium,Design
+P011,API Development,DevTools,2024-01-05,2024-04-05,In Progress,32000,19200,Kate Thomas,6,60,High,Development
+P012,Content Strategy,MediaCorp,2023-11-15,2024-02-28,In Progress,14000,11200,Liam Jackson,3,80,Low,Marketing
+P013,Infrastructure Upgrade,TechSolutions,2024-01-25,2024-07-25,Planning,65000,6500,Mia White,8,10,High,IT
+P014,Customer Portal,ServicePro,2024-02-10,2024-05-10,Planning,22000,2200,Noah Harris,4,10,Medium,Development
+P015,Data Analytics,InsightCorp,2024-01-12,2024-04-12,In Progress,38000,19000,Olivia Martin,5,50,High,Analytics
+P016,Mobile Testing,QualityFirst,2023-12-20,2024-03-20,In Progress,16000,12800,Paul Thompson,4,80,Medium,QA
+P017,Brand Refresh,CreativeAgency,2024-01-08,2024-03-08,In Progress,24000,14400,Quinn Garcia,3,60,Low,Marketing
+P018,Compliance Review,LegalTech,2024-02-05,2024-05-05,Planning,30000,3000,Rachel Martinez,4,10,High,Legal
+P019,Process Automation,EfficiencyPlus,2024-01-18,2024-06-18,Planning,42000,4200,Sam Rodriguez,6,10,Medium,Operations
+P020,Performance Optimization,SpeedTech,2024-02-15,2024-05-15,Planning,26000,2600,Tina Clark,5,10,High,IT

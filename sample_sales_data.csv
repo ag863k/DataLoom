@@ -1,0 +1,53 @@
+Date,Product_Category,Region,Sales_Amount,Units_Sold,Customer_Rating,Sales_Rep,Discount_Applied,Revenue_Target,Customer_Age,Marketing_Channel
+2024-01-15,Electronics,North,15420.50,45,4.2,John Smith,0.15,18000,34,Online
+2024-01-16,Clothing,South,8750.25,32,3.8,Sarah Johnson,0.10,9000,28,Social Media
+2024-01-17,Books,East,3240.75,18,4.7,Mike Wilson,0.05,3500,42,Email
+2024-01-18,Home & Garden,West,12680.00,28,4.1,Lisa Brown,0.12,14000,51,Google Ads
+2024-01-19,Electronics,South,22150.80,62,4.5,David Chen,0.08,25000,29,Online
+2024-01-20,Clothing,North,6890.45,25,3.9,Emma Davis,0.15,8000,37,Social Media
+2024-01-21,Books,West,4520.30,22,4.3,Tom Anderson,0.07,5000,45,Print
+2024-01-22,Home & Garden,East,18740.60,41,4.6,Anna Garcia,0.10,20000,33,Google Ads
+2024-01-23,Electronics,North,19850.25,55,4.0,John Smith,0.12,22000,26,Online
+2024-01-24,Clothing,South,7430.80,29,4.2,Sarah Johnson,0.18,8500,39,Email
+2024-01-25,Books,East,2980.40,15,4.8,Mike Wilson,0.03,3200,58,Social Media
+2024-01-26,Home & Garden,West,16220.90,35,3.7,Lisa Brown,0.14,18000,47,Google Ads
+2024-01-27,Electronics,South,25430.70,71,4.4,David Chen,0.06,28000,31,Online
+2024-01-28,Clothing,North,9180.55,34,4.1,Emma Davis,0.11,10000,24,Print
+2024-01-29,Books,West,5670.20,28,4.5,Tom Anderson,0.09,6000,52,Email
+2024-01-30,Home & Garden,East,21450.40,48,4.3,Anna Garcia,0.13,24000,35,Google Ads
+2024-02-01,Electronics,North,17890.30,51,3.9,John Smith,0.16,20000,41,Online
+2024-02-02,Clothing,South,8920.65,33,4.0,Sarah Johnson,0.12,9500,27,Social Media
+2024-02-03,Books,East,4130.85,21,4.6,Mike Wilson,0.04,4500,49,Email
+2024-02-04,Home & Garden,West,19560.20,42,4.2,Lisa Brown,0.11,22000,36,Google Ads
+2024-02-05,Electronics,South,23750.90,66,4.7,David Chen,0.07,26000,30,Online
+2024-02-06,Clothing,North,7650.40,28,3.8,Emma Davis,0.17,8800,43,Social Media
+2024-02-07,Books,West,3850.60,19,4.4,Tom Anderson,0.06,4200,54,Print
+2024-02-08,Home & Garden,East,20330.80,45,4.1,Anna Garcia,0.12,23000,32,Google Ads
+2024-02-09,Electronics,North,21240.45,59,4.3,John Smith,0.09,24000,38,Online
+2024-02-10,Clothing,South,9540.75,35,4.2,Sarah Johnson,0.14,10500,25,Email
+2024-02-11,Books,East,5290.30,26,4.8,Mike Wilson,0.05,5500,46,Social Media
+2024-02-12,Home & Garden,West,18960.70,41,3.9,Lisa Brown,0.15,21000,50,Google Ads
+2024-02-13,Electronics,South,26180.85,73,4.5,David Chen,0.08,29000,29,Online
+2024-02-14,Clothing,North,8430.90,31,4.0,Emma Davis,0.13,9200,40,Print
+2024-02-15,Books,West,4760.45,23,4.7,Tom Anderson,0.07,5200,55,Email
+2024-02-16,Home & Garden,East,22870.60,51,4.4,Anna Garcia,0.10,25000,34,Google Ads
+2024-02-17,Electronics,North,20150.35,56,4.1,John Smith,0.11,23000,37,Online
+2024-02-18,Clothing,South,10290.80,38,4.3,Sarah Johnson,0.16,11000,26,Social Media
+2024-02-19,Books,East,3670.25,18,4.5,Mike Wilson,0.04,4000,48,Email
+2024-02-20,Home & Garden,West,17840.95,39,4.0,Lisa Brown,0.12,20000,44,Google Ads
+2024-02-21,Electronics,South,24560.40,68,4.6,David Chen,0.09,27000,33,Online
+2024-02-22,Clothing,North,9870.55,36,3.7,Emma Davis,0.14,10800,28,Print
+2024-02-23,Books,West,5120.70,25,4.9,Tom Anderson,0.06,5600,57,Social Media
+2024-02-24,Home & Garden,East,19780.30,44,4.2,Anna Garcia,0.13,22000,39,Google Ads
+2024-02-25,Electronics,North,22340.65,62,4.4,John Smith,0.10,25000,31,Online
+2024-02-26,Clothing,South,8760.90,32,4.1,Sarah Johnson,0.15,9600,42,Email
+2024-02-27,Books,East,4480.55,22,4.3,Mike Wilson,0.05,4800,53,Social Media
+2024-02-28,Home & Garden,West,21650.80,48,4.5,Lisa Brown,0.11,24000,35,Google Ads
+2024-03-01,Electronics,South,27430.20,76,4.8,David Chen,0.07,30000,27,Online
+2024-03-02,Clothing,North,10580.40,39,4.0,Emma Davis,0.17,11500,45,Print
+2024-03-03,Books,West,3920.85,19,4.6,Tom Anderson,0.08,4300,56,Email
+2024-03-04,Home & Garden,East,23160.45,52,4.3,Anna Garcia,0.12,26000,38,Google Ads
+2024-03-05,Electronics,North,19640.70,54,4.2,John Smith,0.13,22000,30,Online
+2024-03-06,Clothing,South,9150.60,34,3.9,Sarah Johnson,0.11,10000,41,Social Media
+2024-03-07,Books,East,5540.90,27,4.7,Mike Wilson,0.06,6000,47,Email
+2024-03-08,Home & Garden,West,20450.25,45,4.1,Lisa Brown,0.14,23000,36,Google Ads

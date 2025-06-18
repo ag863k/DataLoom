@@ -1,0 +1,51 @@
+Date,Customer_ID,Product_Name,Category,Price,Quantity,Discount,Payment_Method,Customer_Age,Gender,City,Customer_Satisfaction
+2024-01-15,C001,Wireless Headphones,Electronics,129.99,1,0.10,Credit Card,28,Male,New York,4.5
+2024-01-15,C002,Running Shoes,Footwear,89.50,2,0.15,PayPal,34,Female,Los Angeles,4.2
+2024-01-16,C003,Coffee Maker,Appliances,245.00,1,0.05,Debit Card,45,Male,Chicago,4.8
+2024-01-16,C004,Yoga Mat,Sports,35.99,1,0.00,Credit Card,29,Female,Houston,4.1
+2024-01-17,C005,Smartphone Case,Accessories,24.99,3,0.20,Cash,22,Male,Phoenix,3.9
+2024-01-17,C006,Organic Shampoo,Beauty,18.75,2,0.08,Credit Card,31,Female,Philadelphia,4.6
+2024-01-18,C007,Gaming Mouse,Electronics,65.00,1,0.12,PayPal,26,Male,San Antonio,4.3
+2024-01-18,C008,Kitchen Knife Set,Kitchenware,156.99,1,0.18,Debit Card,38,Female,San Diego,4.7
+2024-01-19,C009,Bluetooth Speaker,Electronics,78.50,1,0.07,Credit Card,33,Male,Dallas,4.0
+2024-01-19,C010,Skincare Cream,Beauty,42.00,1,0.10,PayPal,27,Female,San Jose,4.4
+2024-01-20,C011,Laptop Stand,Accessories,45.99,1,0.05,Credit Card,30,Male,Austin,4.2
+2024-01-20,C012,Workout Leggings,Clothing,55.00,2,0.15,Debit Card,25,Female,Jacksonville,4.5
+2024-01-21,C013,Smart Watch,Electronics,299.99,1,0.08,Credit Card,35,Male,Fort Worth,4.6
+2024-01-21,C014,Essential Oils Set,Beauty,89.99,1,0.12,PayPal,40,Female,Columbus,4.1
+2024-01-22,C015,Protein Powder,Supplements,67.50,1,0.10,Credit Card,28,Male,Charlotte,4.3
+2024-01-22,C016,Ceramic Mug Set,Kitchenware,32.99,1,0.00,Cash,42,Female,San Francisco,4.8
+2024-01-23,C017,USB Cable,Accessories,12.99,4,0.25,Credit Card,24,Male,Indianapolis,3.7
+2024-01-23,C018,Face Mask Set,Beauty,28.50,1,0.15,PayPal,29,Female,Seattle,4.4
+2024-01-24,C019,Desk Lamp,Home,89.00,1,0.06,Debit Card,36,Male,Denver,4.2
+2024-01-24,C020,Jewelry Box,Accessories,125.00,1,0.10,Credit Card,32,Female,Washington,4.7
+2024-01-25,C021,Wireless Charger,Electronics,39.99,2,0.08,PayPal,27,Male,Boston,4.0
+2024-01-25,C022,Planner Notebook,Stationery,22.50,1,0.05,Credit Card,26,Female,El Paso,4.3
+2024-01-26,C023,Air Fryer,Appliances,199.99,1,0.12,Credit Card,41,Male,Nashville,4.6
+2024-01-26,C024,Sunglasses,Accessories,75.00,1,0.18,Cash,30,Female,Detroit,4.1
+2024-01-27,C025,Resistance Bands,Sports,25.99,1,0.00,PayPal,33,Male,Portland,4.2
+2024-01-27,C026,Hand Cream,Beauty,15.50,3,0.10,Credit Card,28,Female,Las Vegas,4.5
+2024-01-28,C027,Tablet,Electronics,449.99,1,0.05,Debit Card,37,Male,Louisville,4.4
+2024-01-28,C028,Tea Set,Kitchenware,68.99,1,0.15,Credit Card,44,Female,Baltimore,4.8
+2024-01-29,C029,Phone Grip,Accessories,8.99,5,0.20,PayPal,21,Male,Milwaukee,3.8
+2024-01-29,C030,Hair Dryer,Beauty,95.00,1,0.08,Credit Card,31,Female,Albuquerque,4.3
+2024-01-30,C031,Monitor,Electronics,279.99,1,0.10,Debit Card,29,Male,Tucson,4.5
+2024-01-30,C032,Candle Set,Home,45.50,1,0.12,Credit Card,35,Female,Fresno,4.1
+2024-02-01,C033,Gaming Keyboard,Electronics,145.00,1,0.07,PayPal,25,Male,Sacramento,4.6
+2024-02-01,C034,Moisturizer,Beauty,38.75,1,0.10,Credit Card,29,Female,Mesa,4.2
+2024-02-02,C035,Water Bottle,Sports,19.99,2,0.05,Cash,31,Male,Kansas City,4.0
+2024-02-02,C036,Earrings,Jewelry,85.00,1,0.15,Credit Card,33,Female,Atlanta,4.7
+2024-02-03,C037,Backpack,Accessories,69.99,1,0.08,Debit Card,26,Male,Long Beach,4.3
+2024-02-03,C038,Lipstick Set,Beauty,52.50,1,0.12,PayPal,24,Female,Colorado Springs,4.4
+2024-02-04,C039,Wireless Mouse,Electronics,35.00,1,0.00,Credit Card,32,Male,Raleigh,4.1
+2024-02-04,C040,Throw Pillow,Home,28.99,2,0.10,Cash,39,Female,Miami,4.5
+2024-02-05,C041,Protein Bar Box,Supplements,45.99,1,0.06,Credit Card,27,Male,Oakland,4.2
+2024-02-05,C042,Nail Polish Set,Beauty,35.50,1,0.18,PayPal,26,Female,Minneapolis,4.6
+2024-02-06,C043,Speaker,Electronics,125.99,1,0.09,Debit Card,34,Male,Tulsa,4.3
+2024-02-06,C044,Scarf,Clothing,42.00,1,0.15,Credit Card,30,Female,Cleveland,4.0
+2024-02-07,C045,Phone Case,Accessories,16.99,3,0.20,PayPal,23,Male,Wichita,3.9
+2024-02-07,C046,Foundation,Beauty,48.00,1,0.08,Credit Card,28,Female,Arlington,4.4
+2024-02-08,C047,Desk Chair,Furniture,189.99,1,0.12,Debit Card,36,Male,New Orleans,4.7
+2024-02-08,C048,Perfume,Beauty,95.50,1,0.10,Cash,32,Female,Bakersfield,4.1
+2024-02-09,C049,Hard Drive,Electronics,89.99,1,0.05,Credit Card,30,Male,Tampa,4.5
+2024-02-09,C050,Bracelet,Jewelry,75.00,1,0.14,PayPal,35,Female,Aurora,4.2

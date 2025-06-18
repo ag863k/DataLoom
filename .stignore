@@ -1,0 +1,29 @@
+# Files to ignore during Streamlit Cloud deployment
+# Sample data files (available in GitHub but not deployed)
+sample_*.csv
+sample_*.xlsx
+sample_*.json
+SAMPLE_DATA_README.md
+
+# Development files
+.git/
+.github/
+*.md
+!README.md
+
+# Cache and temporary files
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

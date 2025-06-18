@@ -13,36 +13,152 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Initialize session state
+if 'authenticated' not in st.session_state:
+    st.session_state.authenticated = False
+if 'theme' not in st.session_state:
+    st.session_state.theme = 'dark'  # Dark mode as default
+if 'uploaded_files' not in st.session_state:
+    st.session_state.uploaded_files = {}
+
+# Security: Redirect non-authenticated users
+if not st.session_state.authenticated:
+    # Only allow access to login page
+    pass
+else:
+    # Authenticated users can access the app
+    pass
+
 st.markdown("""
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <style>
+    /* Dark mode as default */
+    .stApp {
+        background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+        color: #ffffff;
+    }
+    
     .main-header {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 2rem;
-        border-radius: 10px;
+        border-radius: 15px;
         color: white;
         text-align: center;
         margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
+    
+    .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .logo-icon {
+        width: 48px;
+        height: 48px;
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+    }
+    
+    .logo-svg {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 3rem;
+        font-weight: bold;
+    }
+    
     .metric-card {
-        background: white;
+        background: linear-gradient(135deg, #2d2d44 0%, #3d3d5c 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        backdrop-filter: blur(10px);
+    }
+    
+    .metric-card h3 {
+        color: #667eea;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+    
+    .metric-card h2 {
+        color: #ffffff;
+        margin: 0;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    
+    .insight-card {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
         padding: 1rem;
         border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        border-left: 4px solid #667eea;
-    }
-    .insight-card {
-        background: #f8f9ff;
-        padding: 1rem;
-        border-radius: 8px;
         border-left: 4px solid #4CAF50;
         margin: 0.5rem 0;
+        color: white;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     }
+    
     .upload-section {
         border: 2px dashed #667eea;
-        border-radius: 10px;
+        border-radius: 15px;
         padding: 2rem;
         text-align: center;
-        background: #f8f9ff;
+        background: linear-gradient(135deg, #2d2d44 0%, #3d3d5c 100%);
+        color: white;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .sidebar .stSelectbox > div > div {
+        background: linear-gradient(135deg, #2d2d44 0%, #3d3d5c 100%);
+        color: white;
+    }
+    
+    /* Theme toggle button */
+    .theme-toggle {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 1000;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+    }
+    
+    /* Light mode styles */
+    .light-mode .stApp {
+        background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%);
+        color: #262730;
+    }
+    
+    .light-mode .main-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+    }
+    
+    .light-mode .metric-card {
+        background: white;
+        color: #262730;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .light-mode .upload-section {
+        background: white;
+        color: #262730;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -55,9 +171,19 @@ def init_database():
 db = init_database()
 
 def show_login_page():
-    st.markdown("""
+    # Theme toggle button
+    col1, col2 = st.columns([4, 1])
+    with col2:
+        if st.button("🌓" if st.session_state.theme == 'dark' else "🌙", help="Toggle theme"):
+            st.session_state.theme = 'light' if st.session_state.theme == 'dark' else 'dark'
+            st.rerun()
+    
+    st.markdown(f"""
     <div class="main-header">
-        <h1>DataLoom</h1>
+        <div class="logo-container">
+            <img src="https://cdn-icons-png.flaticon.com/512/2103/2103665.png" class="logo-icon" alt="DataLoom Logo">
+            <h1 style="margin: 0;">DataLoom</h1>
+        </div>
         <p>Professional Analytics Dashboard</p>
     </div>
     """, unsafe_allow_html=True)
@@ -84,15 +210,21 @@ def show_login_page():
     with tab2:
         st.subheader("Create your account")
         with st.form("signup_form"):
-            new_username = st.text_input("Choose Username")
-            new_email = st.text_input("Email Address")
+            new_username = st.text_input("Username")
+            new_email = st.text_input("Email Address", placeholder="example@domain.com")
             new_password = st.text_input("Password", type="password")
             confirm_password = st.text_input("Confirm Password", type="password")
             signup_btn = st.form_submit_button("Create Account", use_container_width=True)
             
             if signup_btn:
+                # Email validation
+                import re
+                email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+                
                 if not all([new_username, new_email, new_password]):
                     st.error("Please fill in all fields")
+                elif not re.match(email_pattern, new_email):
+                    st.error("Please enter a valid email address (e.g., user@example.com)")
                 elif new_password != confirm_password:
                     st.error("Passwords do not match")
                 elif len(new_password) < 6:
@@ -106,17 +238,25 @@ def show_login_page():
 def show_dashboard():
     user = st.session_state.user
     
-    # Header
-    col1, col2 = st.columns([3, 1])
+    # Header with theme toggle
+    col1, col2, col3 = st.columns([3, 1, 1])
     with col1:
         st.markdown(f"""
         <div class="main-header">
-            <h1>Welcome back, {user['username']}! 👋</h1>
+            <div class="logo-container">
+                <img src="https://cdn-icons-png.flaticon.com/512/2103/2103665.png" class="logo-icon" alt="DataLoom Logo">
+                <h1 style="margin: 0;">Logged in as {user['username']} 👋</h1>
+            </div>
             <p>Your personal DataLoom analytics dashboard</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
+        if st.button("🌓" if st.session_state.theme == 'dark' else "🌙", help="Toggle theme"):
+            st.session_state.theme = 'light' if st.session_state.theme == 'dark' else 'dark'
+            st.rerun()
+    
+    with col3:
         if st.button("Logout", use_container_width=True):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
@@ -124,7 +264,12 @@ def show_dashboard():
     
     # Sidebar navigation
     with st.sidebar:
-        st.markdown("### 📊 DataLoom")
+        st.markdown("""
+        <div style="text-align: center; padding: 1rem;">
+            <img src="https://cdn-icons-png.flaticon.com/512/2103/2103665.png" style="width: 32px; height: 32px; filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));">
+            <h2 style="margin: 0.5rem 0; color: #667eea;">DataLoom</h2>
+        </div>
+        """, unsafe_allow_html=True)
         st.markdown("---")
         
         page = st.selectbox(
@@ -136,6 +281,12 @@ def show_dashboard():
         st.markdown("---")
         st.markdown(f"**User:** {user['username']}")
         st.markdown(f"**Member since:** {user['created_at'][:10] if user['created_at'] else 'Unknown'}")
+        
+        # File storage info
+        user_files = db.get_user_files(user['id'])
+        total_size = sum([f['file_size'] or 0 for f in user_files]) / (1024*1024)  # Convert to MB
+        st.markdown(f"**Files stored:** {len(user_files)}")
+        st.markdown(f"**Storage used:** {total_size:.1f} MB")
     
     # Main content based on selected page
     if page == "Dashboard":
@@ -211,20 +362,46 @@ def show_dashboard_page():
 def show_upload_page():
     st.subheader("📁 Upload Your Data")
     
+    # Sample Data Information
+    with st.expander("🎯 Need Sample Data to Test?", expanded=False):
+        st.markdown("""
+        **Don't have data to test with?** We've prepared 11 sample datasets for you!
+        
+        📊 **Available Sample Datasets:**
+        - Sales Data, Customer Data, Employee Data
+        - Marketing Data, Financial Data, Inventory Data
+        - Survey Data, Website Analytics, Project Data
+        - E-commerce Data, IoT Sensor Data
+        
+        **How to get them:**
+        1. Visit our [GitHub Repository](https://github.com/yourusername/DataLoom)
+        2. Download any `sample_*.csv` file
+        3. Upload it here to start exploring!
+        
+        *All sample data is synthetic and safe to use for testing.*
+        """)
+    
     st.markdown("""
     <div class="upload-section">
         <h3>Supported Formats</h3>
-        <p>CSV, Excel (XLS, XLSX)</p>
+        <p>CSV, Excel (XLS, XLSX) - Max size: 50MB</p>
+        <p>Files are automatically compressed and stored securely</p>
     </div>
     """, unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader(
         "Choose your file",
         type=['csv', 'xlsx', 'xls'],
-        help="Upload CSV or Excel files for analysis"
+        help="Upload CSV or Excel files for analysis (Max 50MB)"
     )
     
     if uploaded_file is not None:
+        # Check file size limit (50MB)
+        max_size = 50 * 1024 * 1024  # 50MB in bytes
+        if len(uploaded_file.getvalue()) > max_size:
+            st.error("File size exceeds 50MB limit. Please upload a smaller file.")
+            return
+            
         try:
             # Read the file
             if uploaded_file.name.endswith('.csv'):
@@ -238,7 +415,7 @@ def show_upload_page():
             columns_count = len(df.columns)
             
             # Display preview
-            st.success(f"File uploaded successfully! ({rows_count:,} rows, {columns_count} columns)")
+            st.success(f"File uploaded successfully! ({rows_count:,} rows, {columns_count} columns, {file_size/1024/1024:.1f} MB)")
             
             col1, col2 = st.columns(2)
             with col1:
@@ -259,25 +436,34 @@ def show_upload_page():
             if st.button("Save File to DataLoom", use_container_width=True):
                 user = st.session_state.user
                 
-                # For Streamlit Cloud, we'll store the file content in memory
-                # and save file info to database
-                file_path = f"memory_{user['id']}_{uploaded_file.name}"
-                
-                # Store file data in session state for this session
-                if 'uploaded_files' not in st.session_state:
-                    st.session_state.uploaded_files = {}
-                
-                st.session_state.uploaded_files[file_path] = {
-                    'data': df,
-                    'filename': uploaded_file.name
-                }
-                
-                # Save to database
-                if db.save_user_file(user['id'], uploaded_file.name, file_path, file_size, rows_count, columns_count):
-                    st.success("File saved successfully!")
-                    st.balloons()
-                else:
-                    st.error("Error saving file. Please try again.")
+                with st.spinner("Compressing and saving file..."):
+                    # Compress and store file data
+                    import pickle
+                    import gzip
+                    import base64
+                    
+                    # Compress the dataframe
+                    compressed_data = gzip.compress(pickle.dumps(df))
+                    encoded_data = base64.b64encode(compressed_data).decode('utf-8')
+                    
+                    # Store compressed data in database
+                    if db.save_user_file_with_data(user['id'], uploaded_file.name, 
+                                                 encoded_data, file_size, rows_count, columns_count):
+                        # Also store in session state for immediate access
+                        file_key = f"{user['id']}_{uploaded_file.name}"
+                        st.session_state.uploaded_files[file_key] = {
+                            'data': df,
+                            'filename': uploaded_file.name
+                        }
+                        
+                        st.success("✅ File saved successfully and compressed for storage!")
+                        st.balloons()
+                        
+                        # Show compression stats
+                        compression_ratio = len(compressed_data) / file_size * 100
+                        st.info(f"🗜️ Compression: {compression_ratio:.1f}% of original size")
+                    else:
+                        st.error("Error saving file. Please try again.")
                     
         except Exception as e:
             st.error(f"Error reading file: {str(e)}")
@@ -300,12 +486,28 @@ def show_analytics_page():
         selected_file = file_options[selected_filename]
         
         try:
-            # Load the file from session state if available, otherwise show message
-            if 'uploaded_files' in st.session_state and selected_file['file_path'] in st.session_state.uploaded_files:
-                df = st.session_state.uploaded_files[selected_file['file_path']]['data']
+            # Try to load from session state first
+            file_key = f"{st.session_state.user['id']}_{selected_filename}"
+            if 'uploaded_files' in st.session_state and file_key in st.session_state.uploaded_files:
+                df = st.session_state.uploaded_files[file_key]['data']
             else:
-                st.warning("File data not available in current session. Please re-upload the file to analyze.")
-                return
+                # Try to load from database (compressed data)
+                with st.spinner("Loading file data..."):
+                    df = db.get_file_data(st.session_state.user['id'], selected_filename)
+                    
+                if df is not None:
+                    # Store in session state for faster access
+                    if 'uploaded_files' not in st.session_state:
+                        st.session_state.uploaded_files = {}
+                    st.session_state.uploaded_files[file_key] = {
+                        'data': df,
+                        'filename': selected_filename
+                    }
+                    st.success("📁 File loaded from storage!")
+                else:
+                    st.error("❌ Could not load file data. The file may need to be re-uploaded.")
+                    st.info("💡 Tip: Files are automatically saved and compressed, but very old files may need re-uploading.")
+                    return
             
             # Initialize analyzer
             analyzer = DataAnalyzer(df)
@@ -467,15 +669,36 @@ def show_settings_page():
 
 # Main application logic
 def main():
-    # Initialize session state
+    # Security: Prevent access without authentication
+    # This ensures users can't access the app even if they have a shared link
     if 'authenticated' not in st.session_state:
         st.session_state.authenticated = False
     
-    # Show appropriate page
+    # Apply theme styling based on user preference
+    theme_class = 'light-mode' if st.session_state.get('theme', 'dark') == 'light' else ''
+    if theme_class:
+        st.markdown(f'<div class="{theme_class}">', unsafe_allow_html=True)
+    
+    # Authentication gate - redirect all unauthenticated users to login
     if not st.session_state.authenticated:
+        # Clear any potentially cached data for security
+        if 'user' in st.session_state:
+            del st.session_state.user
+        if 'uploaded_files' in st.session_state:
+            st.session_state.uploaded_files = {}
+        
         show_login_page()
     else:
-        show_dashboard()
+        # Verify user session is still valid
+        if 'user' not in st.session_state:
+            st.session_state.authenticated = False
+            st.error("Session expired. Please login again.")
+            st.rerun()
+        else:
+            show_dashboard()
+    
+    if theme_class:
+        st.markdown('</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()

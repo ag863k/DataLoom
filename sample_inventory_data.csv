@@ -1,0 +1,21 @@
+product_id,product_name,category,supplier,quantity_in_stock,unit_price,reorder_level,last_restocked,warehouse_location
+P001,Wireless Headphones,Electronics,TechCorp,45,79.99,20,2024-01-15,A-101
+P002,Bluetooth Speaker,Electronics,SoundMax,23,129.99,15,2024-01-20,A-102
+P003,Coffee Maker,Appliances,HomeGoods,12,89.99,10,2024-01-10,B-201
+P004,Yoga Mat,Sports,FitLife,67,24.99,30,2024-01-25,C-301
+P005,Desk Lamp,Furniture,LightUp,34,49.99,25,2024-01-18,B-202
+P006,Smartphone Case,Electronics,ProtectAll,156,19.99,50,2024-01-22,A-103
+P007,Water Bottle,Sports,HydroFlow,89,15.99,40,2024-01-12,C-302
+P008,Notebook Set,Stationery,PaperPlus,234,12.99,100,2024-01-28,D-401
+P009,Wireless Mouse,Electronics,TechCorp,78,39.99,35,2024-01-16,A-104
+P010,Kitchen Scale,Appliances,HomeGoods,18,34.99,20,2024-01-14,B-203
+P011,Running Shoes,Sports,FitLife,42,119.99,25,2024-01-19,C-303
+P012,USB Cable,Electronics,TechCorp,145,9.99,75,2024-01-24,A-105
+P013,Throw Pillow,Furniture,ComfortHome,56,29.99,30,2024-01-11,B-204
+P014,Protein Powder,Sports,NutriMax,28,49.99,15,2024-01-26,C-304
+P015,Pen Set,Stationery,WriteWell,167,8.99,80,2024-01-13,D-402
+P016,Tablet Stand,Electronics,TechCorp,91,24.99,40,2024-01-21,A-106
+P017,Blender,Appliances,HomeGoods,15,69.99,12,2024-01-17,B-205
+P018,Resistance Bands,Sports,FitLife,73,19.99,35,2024-01-23,C-305
+P019,Picture Frame,Furniture,DecorPlus,124,16.99,60,2024-01-27,B-206
+P020,Mechanical Keyboard,Electronics,TypeMaster,36,149.99,20,2024-01-29,A-107

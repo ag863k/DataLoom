@@ -1,0 +1,21 @@
+customer_id,first_name,last_name,email,phone,registration_date,age,gender,city,state,country,customer_type,lifetime_value,last_purchase_date,preferred_category
+C001,John,Smith,john.smith@email.com,555-0101,2023-01-15,34,Male,New York,NY,USA,Premium,2450.75,2024-01-25,Electronics
+C002,Sarah,Johnson,sarah.j@email.com,555-0102,2023-02-20,28,Female,Los Angeles,CA,USA,Regular,890.50,2024-01-20,Fashion
+C003,Michael,Brown,m.brown@email.com,555-0103,2023-03-10,45,Male,Chicago,IL,USA,Premium,3200.25,2024-01-28,Sports
+C004,Emily,Davis,emily.davis@email.com,555-0104,2023-01-25,31,Female,Houston,TX,USA,Regular,1250.00,2024-01-15,Home
+C005,David,Wilson,d.wilson@email.com,555-0105,2023-04-05,52,Male,Phoenix,AZ,USA,VIP,5670.80,2024-01-30,Electronics
+C006,Lisa,Miller,lisa.m@email.com,555-0106,2023-02-14,29,Female,Philadelphia,PA,USA,Regular,675.25,2024-01-18,Beauty
+C007,James,Moore,james.moore@email.com,555-0107,2023-05-12,38,Male,San Antonio,TX,USA,Premium,1890.75,2024-01-22,Sports
+C008,Jessica,Taylor,j.taylor@email.com,555-0108,2023-01-30,26,Female,San Diego,CA,USA,Regular,1120.50,2024-01-26,Fashion
+C009,Robert,Anderson,r.anderson@email.com,555-0109,2023-03-18,41,Male,Dallas,TX,USA,Premium,2340.25,2024-01-24,Electronics
+C010,Amanda,Thomas,amanda.t@email.com,555-0110,2023-04-22,33,Female,San Jose,CA,USA,Regular,980.75,2024-01-19,Home
+C011,Christopher,Jackson,c.jackson@email.com,555-0111,2023-02-08,47,Male,Austin,TX,USA,VIP,4250.50,2024-01-29,Sports
+C012,Michelle,White,m.white@email.com,555-0112,2023-06-15,24,Female,Jacksonville,FL,USA,Regular,560.25,2024-01-17,Beauty
+C013,Daniel,Harris,daniel.h@email.com,555-0113,2023-01-12,36,Male,San Francisco,CA,USA,Premium,2780.90,2024-01-27,Electronics
+C014,Ashley,Martin,ashley.m@email.com,555-0114,2023-03-25,30,Female,Columbus,OH,USA,Regular,1340.50,2024-01-21,Fashion
+C015,Matthew,Thompson,m.thompson@email.com,555-0115,2023-05-08,42,Male,Fort Worth,TX,USA,Premium,1950.75,2024-01-23,Home
+C016,Stephanie,Garcia,s.garcia@email.com,555-0116,2023-02-28,27,Female,Charlotte,NC,USA,Regular,780.25,2024-01-16,Beauty
+C017,Kevin,Martinez,k.martinez@email.com,555-0117,2023-04-14,39,Male,Seattle,WA,USA,Premium,2120.50,2024-01-31,Electronics
+C018,Nicole,Robinson,n.robinson@email.com,555-0118,2023-01-20,32,Female,Denver,CO,USA,Regular,1460.75,2024-01-14,Fashion
+C019,Ryan,Clark,ryan.clark@email.com,555-0119,2023-03-30,44,Male,Washington,DC,USA,VIP,3890.25,2024-01-25,Sports
+C020,Jennifer,Rodriguez,j.rodriguez@email.com,555-0120,2023-05-25,35,Female,Boston,MA,USA,Premium,2250.50,2024-01-20,Home

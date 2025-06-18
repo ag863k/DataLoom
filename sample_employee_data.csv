@@ -1,0 +1,41 @@
+Employee_ID,Name,Department,Position,Salary,Years_Experience,Performance_Score,Training_Hours,Remote_Days,Manager_ID,Hire_Date,Age,Gender,Education_Level,Bonus_Percentage
+EMP001,John Smith,Engineering,Senior Developer,95000,8,4.2,45,3,MGR001,2019-03-15,32,Male,Masters,0.12
+EMP002,Sarah Johnson,Marketing,Marketing Manager,78000,6,4.7,38,2,MGR002,2020-01-20,29,Female,Bachelors,0.15
+EMP003,Michael Brown,Sales,Sales Representative,52000,3,3.9,25,1,MGR003,2022-06-10,26,Male,Bachelors,0.08
+EMP004,Emily Davis,HR,HR Specialist,58000,4,4.1,42,4,MGR004,2021-09-05,28,Female,Masters,0.10
+EMP005,David Wilson,Engineering,Junior Developer,65000,2,4.0,55,3,MGR001,2023-02-14,24,Male,Bachelors,0.06
+EMP006,Lisa Garcia,Finance,Financial Analyst,70000,5,4.5,32,2,MGR005,2020-11-30,30,Female,Masters,0.11
+EMP007,Robert Martinez,Operations,Operations Manager,85000,10,4.3,28,1,MGR006,2018-07-22,35,Male,MBA,0.14
+EMP008,Jennifer Lee,Marketing,Content Creator,48000,2,4.2,35,5,MGR002,2023-04-08,25,Female,Bachelors,0.07
+EMP009,William Taylor,Engineering,DevOps Engineer,88000,6,4.6,40,4,MGR001,2019-12-03,31,Male,Masters,0.13
+EMP010,Maria Rodriguez,Sales,Sales Manager,75000,7,4.4,30,2,MGR003,2019-05-17,33,Female,MBA,0.16
+EMP011,James Anderson,IT,System Administrator,62000,4,3.8,48,1,MGR007,2021-08-25,27,Male,Bachelors,0.09
+EMP012,Patricia Thomas,HR,Recruiter,55000,3,4.1,37,3,MGR004,2022-01-12,26,Female,Bachelors,0.08
+EMP013,Christopher Jackson,Finance,Senior Accountant,68000,6,4.2,29,2,MGR005,2020-03-18,30,Male,Masters,0.10
+EMP014,Linda White,Marketing,Digital Marketing Specialist,54000,3,4.3,41,4,MGR002,2022-07-01,27,Female,Bachelors,0.09
+EMP015,Daniel Harris,Engineering,Frontend Developer,72000,4,4.4,43,3,MGR001,2021-10-14,28,Male,Bachelors,0.11
+EMP016,Barbara Clark,Operations,Process Analyst,59000,5,4.0,34,2,MGR006,2020-12-07,29,Female,Masters,0.08
+EMP017,Matthew Lewis,Sales,Account Executive,56000,3,3.7,26,1,MGR003,2022-09-20,25,Male,Bachelors,0.07
+EMP018,Susan Walker,IT,Data Analyst,64000,4,4.5,46,3,MGR007,2021-04-29,28,Female,Masters,0.12
+EMP019,Joseph Hall,Finance,Budget Analyst,61000,3,4.1,31,2,MGR005,2022-11-15,26,Male,Bachelors,0.09
+EMP020,Nancy Allen,HR,Training Coordinator,53000,4,4.3,44,4,MGR004,2021-06-08,29,Female,Masters,0.10
+EMP021,Kenneth Young,Engineering,Backend Developer,79000,5,4.2,39,3,MGR001,2020-08-12,30,Male,Masters,0.11
+EMP022,Betty King,Marketing,Brand Manager,67000,6,4.6,33,2,MGR002,2019-11-25,32,Female,MBA,0.13
+EMP023,Steven Wright,Sales,Regional Sales Manager,82000,8,4.4,27,1,MGR003,2018-12-10,34,Male,MBA,0.15
+EMP024,Helen Lopez,Operations,Quality Assurance,58000,4,4.1,36,2,MGR006,2021-07-22,28,Female,Bachelors,0.09
+EMP025,Edward Hill,IT,Security Specialist,76000,6,4.3,42,1,MGR007,2020-02-14,31,Male,Masters,0.12
+EMP026,Sandra Scott,Finance,Tax Specialist,63000,5,4.0,30,3,MGR005,2020-10-05,29,Female,Masters,0.10
+EMP027,Brian Green,Engineering,Mobile Developer,74000,4,4.5,47,4,MGR001,2021-12-01,27,Male,Bachelors,0.11
+EMP028,Donna Adams,HR,Compensation Analyst,60000,5,4.2,38,2,MGR004,2020-05-30,30,Female,Masters,0.10
+EMP029,Ronald Baker,Sales,Inside Sales Representative,49000,2,3.9,24,1,MGR003,2023-01-18,24,Male,Bachelors,0.06
+EMP030,Carol Gonzalez,Marketing,SEO Specialist,52000,3,4.4,40,5,MGR002,2022-08-14,26,Female,Bachelors,0.08
+EMP031,Anthony Nelson,Operations,Supply Chain Analyst,65000,5,4.1,32,2,MGR006,2020-09-21,29,Male,Masters,0.09
+EMP032,Ruth Carter,IT,Database Administrator,71000,6,4.3,45,1,MGR007,2019-08-07,32,Female,Masters,0.12
+EMP033,Mark Mitchell,Finance,Investment Analyst,73000,5,4.6,35,2,MGR005,2020-06-12,30,Male,MBA,0.13
+EMP034,Sharon Perez,Engineering,QA Engineer,66000,4,4.2,41,3,MGR001,2021-11-28,28,Female,Bachelors,0.10
+EMP035,Paul Roberts,Sales,Business Development,71000,6,4.5,29,2,MGR003,2019-10-15,31,Male,MBA,0.14
+EMP036,Kimberly Turner,Marketing,Product Marketing Manager,69000,5,4.4,37,3,MGR002,2020-07-03,29,Female,Masters,0.12
+EMP037,Jason Phillips,Operations,Logistics Coordinator,54000,3,3.8,33,1,MGR006,2022-04-19,26,Male,Bachelors,0.07
+EMP038,Deborah Campbell,HR,Benefits Administrator,56000,4,4.1,39,4,MGR004,2021-09-14,28,Female,Bachelors,0.09
+EMP039,Frank Parker,IT,Network Engineer,68000,5,4.2,43,2,MGR007,2020-12-22,30,Male,Masters,0.11
+EMP040,Michelle Evans,Finance,Cost Accountant,59000,3,4.0,28,2,MGR005,2022-05-07,27,Female,Bachelors,0.08

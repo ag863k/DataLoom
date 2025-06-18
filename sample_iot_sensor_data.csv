@@ -1,0 +1,21 @@
+sensor_id,timestamp,temperature,humidity,pressure,battery_level,location,device_type,status,signal_strength
+S001,2024-01-15 08:00:00,22.5,45.2,1013.2,85,Office-Floor1,Temperature,Active,-65
+S002,2024-01-15 08:00:00,21.8,48.7,1012.8,92,Office-Floor2,Temperature,Active,-58
+S003,2024-01-15 08:00:00,23.1,42.3,1014.1,78,Warehouse-A,Humidity,Active,-72
+S004,2024-01-15 08:00:00,19.6,65.8,1011.5,95,Server-Room,Temperature,Active,-45
+S005,2024-01-15 08:00:00,25.3,38.9,1015.2,67,Factory-Zone1,Pressure,Warning,-68
+S006,2024-01-15 08:15:00,22.7,45.8,1013.5,85,Office-Floor1,Temperature,Active,-64
+S007,2024-01-15 08:15:00,21.9,49.1,1012.6,91,Office-Floor2,Temperature,Active,-59
+S008,2024-01-15 08:15:00,23.4,41.8,1014.3,77,Warehouse-A,Humidity,Active,-71
+S009,2024-01-15 08:15:00,19.8,66.2,1011.3,94,Server-Room,Temperature,Active,-46
+S010,2024-01-15 08:15:00,25.6,37.5,1015.4,66,Factory-Zone1,Pressure,Warning,-69
+S011,2024-01-15 08:30:00,22.9,46.3,1013.8,84,Office-Floor1,Temperature,Active,-66
+S012,2024-01-15 08:30:00,22.1,49.5,1012.4,90,Office-Floor2,Temperature,Active,-60
+S013,2024-01-15 08:30:00,23.7,41.2,1014.6,76,Warehouse-A,Humidity,Active,-73
+S014,2024-01-15 08:30:00,20.2,66.7,1011.1,93,Server-Room,Temperature,Active,-47
+S015,2024-01-15 08:30:00,25.9,36.8,1015.7,65,Factory-Zone1,Pressure,Error,-70
+S016,2024-01-15 08:45:00,23.2,46.9,1014.1,83,Office-Floor1,Temperature,Active,-65
+S017,2024-01-15 08:45:00,22.3,50.1,1012.2,89,Office-Floor2,Temperature,Active,-61
+S018,2024-01-15 08:45:00,24.1,40.7,1014.9,75,Warehouse-A,Humidity,Active,-74
+S019,2024-01-15 08:45:00,20.5,67.3,1010.9,92,Server-Room,Temperature,Active,-48
+S020,2024-01-15 08:45:00,26.2,36.2,1016.1,64,Factory-Zone1,Pressure,Error,-71

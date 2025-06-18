@@ -1,0 +1,21 @@
+website_id,session_id,user_id,page_url,page_title,visit_date,session_duration_minutes,page_views,bounce_rate,traffic_source,device_type,browser,operating_system,country,conversion
+W001,S001,U001,/home,Home Page,2024-01-15,12.5,5,0,Organic Search,Desktop,Chrome,Windows,USA,1
+W002,S002,U002,/products,Products,2024-01-15,8.2,3,0,Direct,Mobile,Safari,iOS,Canada,0
+W003,S003,U003,/about,About Us,2024-01-15,4.1,2,1,Social Media,Desktop,Firefox,Windows,UK,0
+W004,S004,U004,/contact,Contact,2024-01-16,2.3,1,1,Email Campaign,Tablet,Chrome,Android,Australia,0
+W005,S005,U005,/home,Home Page,2024-01-16,15.8,7,0,Paid Search,Desktop,Edge,Windows,USA,1
+W006,S006,U006,/products,Products,2024-01-16,11.4,4,0,Referral,Mobile,Chrome,Android,Germany,1
+W007,S007,U007,/checkout,Checkout,2024-01-17,6.7,2,0,Direct,Desktop,Safari,MacOS,France,1
+W008,S008,U008,/home,Home Page,2024-01-17,3.2,1,1,Social Media,Mobile,Samsung Browser,Android,Brazil,0
+W009,S009,U009,/blog,Blog,2024-01-17,9.6,6,0,Organic Search,Desktop,Chrome,Windows,Japan,0
+W010,S010,U010,/products,Products,2024-01-18,13.1,5,0,Paid Search,Tablet,Safari,iOS,India,1
+W011,S011,U011,/support,Support,2024-01-18,7.8,3,0,Email Campaign,Desktop,Firefox,Linux,Netherlands,0
+W012,S012,U012,/home,Home Page,2024-01-18,5.9,2,0,Direct,Mobile,Chrome,Android,Italy,0
+W013,S013,U013,/pricing,Pricing,2024-01-19,10.2,4,0,Referral,Desktop,Edge,Windows,Spain,1
+W014,S014,U014,/features,Features,2024-01-19,14.6,8,0,Organic Search,Mobile,Safari,iOS,Sweden,0
+W015,S015,U015,/home,Home Page,2024-01-19,8.7,3,0,Social Media,Desktop,Chrome,Windows,Mexico,0
+W016,S016,U016,/login,Login,2024-01-20,4.5,2,0,Direct,Tablet,Chrome,Android,Russia,1
+W017,S017,U017,/dashboard,Dashboard,2024-01-20,18.3,12,0,Direct,Desktop,Safari,MacOS,China,1
+W018,S018,U018,/home,Home Page,2024-01-20,2.1,1,1,Paid Search,Mobile,Firefox,Android,South Korea,0
+W019,S019,U019,/products,Products,2024-01-21,12.9,6,0,Email Campaign,Desktop,Chrome,Windows,Norway,1
+W020,S020,U020,/about,About Us,2024-01-21,6.4,2,0,Organic Search,Mobile,Safari,iOS,Denmark,0

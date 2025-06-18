@@ -124,8 +124,21 @@ dmypy.json
 dataloom.db
 user_data/
 uploads/
-*.csv
-*.xlsx
-*.json
 temp_*
-.streamlit/
+
+# User uploaded files (exclude from deployment)
+temp_uploads/
+user_uploads/
+uploaded_files/
+
+# Test files (not sample data)
+*test*.csv
+*test*.xlsx
+*test*.json
+*demo*.csv
+*demo*.xlsx
+*demo*.json
+test_data/
+demo_data/
+
+# Note: sample_*.csv files are included in git but excluded from Streamlit deployment via .stignore

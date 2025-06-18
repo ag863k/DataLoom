@@ -33,6 +33,7 @@ class DatabaseManager:
                 user_id INTEGER NOT NULL,
                 filename TEXT NOT NULL,
                 file_path TEXT NOT NULL,
+                compressed_data TEXT,
                 upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 file_size INTEGER,
                 rows_count INTEGER,
@@ -40,6 +41,12 @@ class DatabaseManager:
                 FOREIGN KEY (user_id) REFERENCES users (id)
             )
         ''')
+        
+        # Add compressed_data column if it doesn't exist (for existing databases)
+        try:
+            cursor.execute('ALTER TABLE user_files ADD COLUMN compressed_data TEXT')
+        except:
+            pass  # Column already exists
         
         # User preferences table
         cursor.execute('''
@@ -157,6 +164,59 @@ class DatabaseManager:
         except Exception as e:
             print(f"Error saving file: {e}")  # For debugging
             return False
+    
+    def save_user_file_with_data(self, user_id: int, filename: str, compressed_data: str,
+                               file_size: int, rows_count: int, columns_count: int) -> bool:
+        """Save user file with compressed data to database"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            # Use a memory path identifier
+            file_path = f"compressed_{user_id}_{filename}"
+            
+            cursor.execute('''
+                INSERT INTO user_files (user_id, filename, file_path, compressed_data, file_size, rows_count, columns_count)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (user_id, filename, file_path, compressed_data, file_size, rows_count, columns_count))
+            
+            conn.commit()
+            conn.close()
+            return True
+            
+        except Exception as e:
+            print(f"Error saving file with data: {e}")  # For debugging
+            return False
+
+    def get_file_data(self, user_id: int, filename: str):
+        """Retrieve compressed file data and decompress it"""
+        try:
+            import pickle
+            import gzip
+            import base64
+            
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                SELECT compressed_data FROM user_files 
+                WHERE user_id = ? AND filename = ? AND compressed_data IS NOT NULL
+            ''', (user_id, filename))
+            
+            result = cursor.fetchone()
+            conn.close()
+            
+            if result and result[0]:
+                # Decompress the data
+                compressed_data = base64.b64decode(result[0])
+                df = pickle.loads(gzip.decompress(compressed_data))
+                return df
+            
+            return None
+            
+        except Exception as e:
+            print(f"Error retrieving file data: {e}")
+            return None
     
     def get_user_files(self, user_id: int) -> List[Dict[str, Any]]:
         """Get all files for a user"""
