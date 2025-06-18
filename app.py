@@ -354,13 +354,55 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-@st.cache_resource
+@st.cache_resource(version="v3")
 def init_database():
-    return DatabaseManager()
+    try:
+        return DatabaseManager()
+    except Exception as e:
+        st.error(f"Database initialization failed: {e}")
+        st.stop()
 
-db = init_database()
+# Initialize database with error handling and fallback
+def get_database():
+    try:
+        db = init_database()
+        if not hasattr(db, 'get_user_by_email'):
+            st.cache_resource.clear()
+            db = DatabaseManager()
+        return db
+    except Exception as e:
+        st.error(f"Critical database error: {e}")
+        st.stop()
+
+db = get_database()
+
+def check_database_health():
+    """Check if database connection and methods are working properly"""
+    try:
+        if not hasattr(db, 'get_user_by_email'):
+            st.error("❌ Database connection issue: Missing methods")
+            return False
+        # Test database connection with a simple query
+        test_result = db.get_user_by_email("test@example.com")  # This should return None but not error
+        return True
+    except Exception as e:
+        st.error(f"❌ Database health check failed: {str(e)}")
+        return False
+
+def safe_db_operation(operation, error_message="Database operation failed"):
+    """Safely execute database operations with error handling"""
+    try:
+        return operation()
+    except Exception as e:
+        st.error(f"❌ {error_message}: {str(e)}")
+        return None
 
 def show_login_page():
+    # Check database health before proceeding
+    if not check_database_health():
+        st.error("❌ Database is not available. Please try refreshing the page.")
+        st.stop()
+        
     st.markdown(f"""
     <div class="main-header">
         <div class="logo-container">
@@ -385,14 +427,19 @@ def show_login_page():
                 if not username or not password:
                     st.error("⚠️ Please enter both username and password")
                 else:
-                    user = db.verify_user(username, password)
+                    user = safe_db_operation(
+                        lambda: db.verify_user(username, password),
+                        "Error during login verification"
+                    )
                     if user:
                         st.session_state.authenticated = True
                         st.session_state.user = user
                         st.success("✅ Login successful!")
                         st.rerun()
-                    else:
-                        st.error("❌ Invalid username or password. Please check your credentials or create an account first.")
+                    elif user is False or user is None:
+                        if hasattr(db, 'verify_user'):
+                            st.error("❌ Invalid username or password. Please check your credentials or create an account first.")
+                        # If user is None and method doesn't exist, error was already shown by safe_db_operation
 
     with tab2:
         st.subheader("Create your account", anchor=False)
@@ -449,14 +496,30 @@ def show_login_page():
                     st.error("❌ Password must contain at least one letter and one number")
                 elif new_password != confirm_password:
                     st.error("❌ Passwords do not match. Please check both password fields")
-                elif db.get_user_by_email(new_email):
-                    st.error("❌ This email address is already in use. Please use a different email or login.")
                 else:
-                    if db.create_user(new_username, new_email, new_password):
+                    # Check if email already exists with proper error handling
+                    existing_user = safe_db_operation(
+                        lambda: db.get_user_by_email(new_email),
+                        "Error checking if email exists"
+                    )
+                    if existing_user is None and hasattr(db, 'get_user_by_email'):
+                        # If the operation failed but method exists, it's a genuine error
+                        return
+                    elif existing_user:
+                        st.error("❌ This email address is already in use. Please use a different email or login.")
+                        return
+                    
+                    # Try to create the user
+                    result = safe_db_operation(
+                        lambda: db.create_user(new_username, new_email, new_password),
+                        "Error creating user account"
+                    )
+                    if result is True:
                         st.session_state.signup_success = True
                         st.rerun()
-                    else:
+                    elif result is False:
                         st.error("❌ Username already exists. Please try a different username.")
+                    # If result is None, the error was already displayed by safe_db_operation
 
 def show_dashboard():
     user = st.session_state.user
