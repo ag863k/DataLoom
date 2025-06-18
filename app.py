@@ -303,6 +303,53 @@ st.markdown("""
         background: linear-gradient(135deg, #2d2d44 0%, #3d3d5c 100%);
         color: white;
     }
+    
+    /* Enhanced drag and drop styling */
+    .stFileUploader {
+        border: 2px dashed #667eea;
+        border-radius: 15px;
+        padding: 2rem;
+        background: linear-gradient(135deg, #2d2d44 0%, #3d3d5c 100%);
+        transition: all 0.3s ease;
+    }
+    
+    .stFileUploader:hover {
+        border-color: #4CAF50;
+        background: linear-gradient(135deg, #3d3d5c 0%, #4d4d6c 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+    }
+    
+    .stFileUploader > div {
+        color: white !important;
+        text-align: center;
+    }
+    
+    .stFileUploader section {
+        border: none !important;
+        background: transparent !important;
+    }
+    
+    .stFileUploader [data-testid="stFileUploaderDropzone"] {
+        border: 2px dashed #667eea !important;
+        border-radius: 15px !important;
+        background: linear-gradient(135deg, #2d2d44 0%, #3d3d5c 100%) !important;
+        color: white !important;
+        padding: 2rem !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .stFileUploader [data-testid="stFileUploaderDropzone"]:hover {
+        border-color: #4CAF50 !important;
+        background: linear-gradient(135deg, #3d3d5c 0%, #4d4d6c 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2) !important;
+    }
+    
+    .stFileUploader [data-testid="stFileUploaderDropzoneInstructions"] {
+        color: white !important;
+        font-size: 1.1rem !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -571,16 +618,19 @@ def show_upload_page():
     
     st.markdown("""
     <div class="upload-section">
-        <h3>Supported Formats</h3>
-        <p>CSV, Excel (XLS, XLSX) - Max size: 50MB</p>
-        <p>Files are automatically compressed and stored securely</p>
+        <h3>📂 Drag & Drop Zone</h3>
+        <p><strong>Simply drag your files here or click to browse</strong></p>
+        <p>📄 Supported: CSV, Excel (XLS, XLSX) - Max size: 50MB</p>
+        <p>🔒 Files are automatically compressed and stored securely</p>
+        <p style="color: #4CAF50; font-size: 0.9rem;">✨ Drag and drop enabled for faster uploads!</p>
     </div>
     """, unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader(
-        "Choose your file",
+        "📁 Drag and drop your file here, or click to browse",
         type=['csv', 'xlsx', 'xls'],
-        help="Upload CSV or Excel files for analysis (Max 50MB)"
+        help="Drag and drop CSV or Excel files for analysis (Max 50MB)",
+        accept_multiple_files=False
     )
     
     if uploaded_file is not None:
