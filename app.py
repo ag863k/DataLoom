@@ -34,8 +34,6 @@ st.set_page_config(
 # Initialize session state
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
-if 'theme' not in st.session_state:
-    st.session_state.theme = 'dark'  # Dark mode as default
 if 'uploaded_files' not in st.session_state:
     st.session_state.uploaded_files = {}
 
@@ -138,46 +136,6 @@ st.markdown("""
         background: linear-gradient(135deg, #2d2d44 0%, #3d3d5c 100%);
         color: white;
     }
-    
-    /* Theme toggle button */
-    .theme-toggle {
-        position: fixed;
-        top: 1rem;
-        right: 1rem;
-        z-index: 1000;
-        background: linear-gradient(45deg, #667eea, #764ba2);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        font-size: 1.2rem;
-        cursor: pointer;
-        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
-    }
-    
-    /* Light mode styles */
-    .light-mode .stApp {
-        background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%);
-        color: #262730;
-    }
-    
-    .light-mode .main-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
-    }
-    
-    .light-mode .metric-card {
-        background: white;
-        color: #262730;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
-    
-    .light-mode .upload-section {
-        background: white;
-        color: #262730;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -216,48 +174,82 @@ def show_login_page():
             login_btn = st.form_submit_button("Login", use_container_width=True)
             
             if login_btn:
-                user = db.authenticate_user(username, password)
-                if user:
-                    st.session_state.authenticated = True
-                    st.session_state.user = user
-                    st.success("Login successful!")
-                    st.rerun()
+                if not username or not password:
+                    st.error("⚠️ Please enter both username and password")
                 else:
-                    st.error("Invalid username or password")
+                    user = db.verify_user(username, password)
+                    if user:
+                        st.session_state.authenticated = True
+                        st.session_state.user = user
+                        st.success("✅ Login successful!")
+                        st.rerun()
+                    else:
+                        st.error("❌ Invalid username or password. Please check your credentials or create an account first.")
     
     with tab2:
         st.subheader("Create your account")
+        
+        # Password requirements info
+        with st.expander("📋 Account Requirements", expanded=False):
+            st.markdown("""
+            **Username:**
+            - 3-20 characters long
+            - Letters, numbers, hyphens (-), and underscores (_) only
+            
+            **Email:**
+            - Valid email format (e.g., user@domain.com)
+            - Will be used for account recovery
+            
+            **Password:**
+            - Minimum 8 characters
+            - Must contain at least one letter and one number
+            - Both password fields must match
+            """)
+        
         with st.form("signup_form"):
-            new_username = st.text_input("Username")
+            new_username = st.text_input("Username", help="Choose a unique username (3-20 characters)")
             new_email = st.text_input("Email Address", placeholder="example@domain.com")
-            new_password = st.text_input("Password", type="password")
+            new_password = st.text_input("Password", type="password", help="Minimum 8 characters")
             confirm_password = st.text_input("Confirm Password", type="password")
             signup_btn = st.form_submit_button("Create Account", use_container_width=True)
             
             if signup_btn:
-                # Email validation
+                # Validation
                 import re
                 email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+                username_pattern = r'^[a-zA-Z0-9_-]{3,20}$'
                 
-                if not all([new_username, new_email, new_password]):
-                    st.error("Please fill in all fields")
+                # Check all fields filled
+                if not all([new_username, new_email, new_password, confirm_password]):
+                    st.error("⚠️ Please fill in all fields")
+                # Username validation
+                elif not re.match(username_pattern, new_username):
+                    st.error("❌ Username must be 3-20 characters long and contain only letters, numbers, hyphens, and underscores")
+                # Email validation
                 elif not re.match(email_pattern, new_email):
-                    st.error("Please enter a valid email address (e.g., user@example.com)")
+                    st.error("❌ Please enter a valid email address (example: user@domain.com)")
+                # Password length validation
+                elif len(new_password) < 8:
+                    st.error("❌ Password must be at least 8 characters long")
+                # Password strength validation
+                elif not re.search(r'[A-Za-z]', new_password) or not re.search(r'[0-9]', new_password):
+                    st.error("❌ Password must contain at least one letter and one number")
+                # Password confirmation validation
                 elif new_password != confirm_password:
-                    st.error("Passwords do not match")
-                elif len(new_password) < 6:
-                    st.error("Password must be at least 6 characters long")
+                    st.error("❌ Passwords do not match. Please check both password fields")
                 else:
+                    # Try to create user
                     if db.create_user(new_username, new_email, new_password):
-                        st.success("Account created successfully! Please login.")
+                        st.success("✅ Account created successfully! You can now login with your credentials.")
+                        st.info("💡 Please switch to the Login tab to access your account")
                     else:
-                        st.error("Username or email already exists")
+                        st.error("❌ Username or email already exists. Please try different credentials.")
 
 def show_dashboard():
     user = st.session_state.user
     
-    # Header with theme toggle
-    col1, col2, col3 = st.columns([3, 1, 1])
+    # Header without theme toggle
+    col1, col2 = st.columns([4, 1])
     with col1:
         st.markdown(f"""
         <div class="main-header">
@@ -270,11 +262,6 @@ def show_dashboard():
         """, unsafe_allow_html=True)
     
     with col2:
-        if st.button("🌓" if st.session_state.theme == 'dark' else "🌙", help="Toggle theme"):
-            st.session_state.theme = 'light' if st.session_state.theme == 'dark' else 'dark'
-            st.rerun()
-    
-    with col3:
         if st.button("Logout", use_container_width=True):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]

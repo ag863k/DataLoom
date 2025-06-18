@@ -122,9 +122,19 @@ dmypy.json
 
 # DataLoom specific
 dataloom.db
+*.db
 user_data/
 uploads/
 temp_*
+
+# Secrets and sensitive files
+*.env
+.env.*
+*.key
+*.pem
+config.local.toml
+
+# Note: .streamlit/secrets.toml is included as template but actual secrets should be added in Streamlit Cloud
 
 # User uploaded files (exclude from deployment)
 temp_uploads/
