@@ -1,3 +1,7 @@
+"""
+DataLoom - Professional Analytics Dashboard
+Production-ready Streamlit application with secure authentication and database integration.
+"""
 import streamlit as st
 import pandas as pd
 from database import DatabaseManager
@@ -7,7 +11,6 @@ import os
 from datetime import datetime
 import base64
 
-# Function to load and encode favicon
 def get_favicon_base64():
     try:
         with open("assets/favicon.ico", "rb") as f:
@@ -15,13 +18,11 @@ def get_favicon_base64():
     except FileNotFoundError:
         return None
 
-# Function to get favicon data URL
 def get_favicon_data_url():
     favicon_b64 = get_favicon_base64()
     if favicon_b64:
         return f"data:image/x-icon;base64,{favicon_b64}"
     else:
-        # Fallback to external icon if favicon not found
         return "https://cdn-icons-png.flaticon.com/512/2103/2103665.png"
 
 st.set_page_config(
@@ -31,24 +32,19 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Initialize session state
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 if 'uploaded_files' not in st.session_state:
     st.session_state.uploaded_files = {}
 
-# Security: Redirect non-authenticated users
 if not st.session_state.authenticated:
-    # Only allow access to login page
     pass
 else:
-    # Authenticated users can access the app
     pass
 
 st.markdown("""
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <style>
-    /* Mobile-first responsive design */
     .stApp {
         background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
         color: #ffffff;
@@ -130,7 +126,6 @@ st.markdown("""
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
     
-    /* Mobile responsive adjustments */
     @media screen and (max-width: 768px) {
         .main-header {
             padding: 1rem 0.5rem;
@@ -167,7 +162,6 @@ st.markdown("""
             padding: 0.6rem;
         }
         
-        /* Streamlit specific mobile fixes */
         .stSelectbox > div > div {
             min-height: 2.5rem;
         }
@@ -180,9 +174,31 @@ st.markdown("""
         .stColumns > div {
             padding: 0 0.25rem;
         }
+        
+        .stForm {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stForm > div {
+            margin-bottom: 0.8rem;
+        }
+        
+        .stForm button[kind="formSubmit"] {
+            width: 100% !important;
+            margin-top: 1rem !important;
+            order: 999;
+        }
+        
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 0.5rem;
+        }
+        
+        .stTabs [data-baseweb="tab-panel"] {
+            padding: 1rem 0 !important;
+        }
     }
     
-    /* Small mobile devices */
     @media screen and (max-width: 480px) {
         .main-header {
             padding: 0.8rem 0.3rem;
@@ -213,18 +229,74 @@ st.markdown("""
             font-size: 0.9rem;
             padding: 0.5rem;
         }
+        
+        .stForm button[kind="formSubmit"] {
+            font-size: 1rem !important;
+            padding: 0.75rem !important;
+            margin-top: 1.5rem !important;
+            border-radius: 8px !important;
+        }
+        
+        .stTextInput > div > div > input {
+            font-size: 1rem;
+            padding: 0.75rem;
+        }
+        
+        .stTabs [data-baseweb="tab-list"] button {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
     }
     
-    /* Ensure proper text wrapping */
     .stMarkdown, .stText {
         word-wrap: break-word;
         overflow-wrap: break-word;
     }
     
-    /* Fix sidebar on mobile */
+    .stForm {
+        background: rgba(45, 45, 68, 0.3);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        margin: 1rem 0;
+    }
+    
+    .stForm button[kind="formSubmit"] {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 0.75rem 2rem !important;
+        font-weight: 600 !important;
+        margin-top: 1rem !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .stForm button[kind="formSubmit"]:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4) !important;
+    }
+    
+    .stTextInput > div > div > input {
+        background: rgba(61, 61, 92, 0.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        color: white !important;
+        border-radius: 8px !important;
+    }
+    
+    .stTextInput > div > div > input:focus {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3) !important;
+    }
+    
     @media screen and (max-width: 768px) {
         .css-1d391kg {
             padding: 1rem 0.5rem;
+        }
+        
+        .stForm {
+            padding: 1rem;
+            margin: 0.5rem 0;
         }
     }
     
@@ -303,31 +375,23 @@ def show_login_page():
             signup_btn = st.form_submit_button("Create Account", use_container_width=True)
             
             if signup_btn:
-                # Validation
                 import re
                 email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
                 username_pattern = r'^[a-zA-Z0-9_-]{3,20}$'
                 
-                # Check all fields filled
                 if not all([new_username, new_email, new_password, confirm_password]):
                     st.error("⚠️ Please fill in all fields")
-                # Username validation
                 elif not re.match(username_pattern, new_username):
                     st.error("❌ Username must be 3-20 characters long and contain only letters, numbers, hyphens, and underscores")
-                # Email validation
                 elif not re.match(email_pattern, new_email):
                     st.error("❌ Please enter a valid email address (example: user@domain.com)")
-                # Password length validation
                 elif len(new_password) < 8:
                     st.error("❌ Password must be at least 8 characters long")
-                # Password strength validation
                 elif not re.search(r'[A-Za-z]', new_password) or not re.search(r'[0-9]', new_password):
                     st.error("❌ Password must contain at least one letter and one number")
-                # Password confirmation validation
                 elif new_password != confirm_password:
                     st.error("❌ Passwords do not match. Please check both password fields")
                 else:
-                    # Try to create user
                     if db.create_user(new_username, new_email, new_password):
                         st.success("✅ Account created successfully! You can now login with your credentials.")
                         st.info("💡 Please switch to the Login tab to access your account")
@@ -337,16 +401,15 @@ def show_login_page():
 def show_dashboard():
     user = st.session_state.user
     
-    # Header without theme toggle
     col1, col2 = st.columns([4, 1])
     with col1:
         st.markdown(f"""
         <div class="main-header">
             <div class="logo-container">
                 <img src="{get_favicon_data_url()}" class="logo-icon" alt="DataLoom Logo">
-                <h1 style="margin: 0;">Logged in as {user['username']} 👋</h1>
+                <h1 style="margin: 0;">DataLoom Analytics</h1>
             </div>
-            <p>Your personal DataLoom analytics dashboard</p>
+            <p>Welcome back, {user['username']}!</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -356,7 +419,6 @@ def show_dashboard():
                 del st.session_state[key]
             st.rerun()
     
-    # Sidebar navigation
     with st.sidebar:
         st.markdown(f"""
         <div style="text-align: center; padding: 1rem;">
@@ -530,19 +592,14 @@ def show_upload_page():
             if st.button("Save File to DataLoom", use_container_width=True):
                 user = st.session_state.user
                 
-                with st.spinner("Compressing and saving file..."):
-                    # Compress and store file data
-                    import pickle
-                    import gzip
-                    import base64
+                with st.spinner("Auto-compressing and saving to database..."):
+                    # Determine file type
+                    file_type = 'csv' if uploaded_file.name.endswith('.csv') else 'excel'
                     
-                    # Compress the dataframe
-                    compressed_data = gzip.compress(pickle.dumps(df))
-                    encoded_data = base64.b64encode(compressed_data).decode('utf-8')
+                    # Store data in database (method handles compression internally)
+                    file_id = db.save_user_file_with_data(user['id'], uploaded_file.name, df, file_type)
                     
-                    # Store compressed data in database
-                    if db.save_user_file_with_data(user['id'], uploaded_file.name, 
-                                                 encoded_data, file_size, rows_count, columns_count):
+                    if file_id:
                         # Also store in session state for immediate access
                         file_key = f"{user['id']}_{uploaded_file.name}"
                         st.session_state.uploaded_files[file_key] = {
@@ -550,14 +607,13 @@ def show_upload_page():
                             'filename': uploaded_file.name
                         }
                         
-                        st.success("✅ File saved successfully and compressed for storage!")
+                        st.success("✅ File saved successfully to DataLoom!")
                         st.balloons()
                         
-                        # Show compression stats
-                        compression_ratio = len(compressed_data) / file_size * 100
-                        st.info(f"🗜️ Compression: {compression_ratio:.1f}% of original size")
+                        # Show file info
+                        st.info(f"� Saved: {rows_count:,} rows, {columns_count} columns")
                     else:
-                        st.error("Error saving file. Please try again.")
+                        st.error("❌ Error saving file. Please try again.")
                     
         except Exception as e:
             st.error(f"Error reading file: {str(e)}")
@@ -587,7 +643,18 @@ def show_analytics_page():
             else:
                 # Try to load from database (compressed data)
                 with st.spinner("Loading file data..."):
-                    df = db.get_file_data(st.session_state.user['id'], selected_filename)
+                    # First find the file_id from user_files
+                    user_files = db.get_user_files(st.session_state.user['id'])
+                    file_id = None
+                    for file_info in user_files:
+                        if file_info['filename'] == selected_filename:
+                            file_id = file_info['id']
+                            break
+                    
+                    if file_id:
+                        df = db.get_file_data(file_id)
+                    else:
+                        df = None
                     
                 if df is not None:
                     # Store in session state for faster access
@@ -747,7 +814,14 @@ def show_settings_page():
         file_to_delete = st.selectbox("Select file to delete:", [f['filename'] for f in user_files])
         
         if st.button("Delete Selected File", type="secondary"):
-            if db.delete_user_file(user['id'], file_to_delete):
+            # Find the file_id for the selected filename
+            file_id = None
+            for file_info in user_files:
+                if file_info['filename'] == file_to_delete:
+                    file_id = file_info['id']
+                    break
+            
+            if file_id and db.delete_user_file(file_id, user['id']):
                 # Also remove from session state if exists
                 files_to_remove = [key for key in st.session_state.get('uploaded_files', {}).keys() 
                                  if file_to_delete in key]
@@ -761,16 +835,11 @@ def show_settings_page():
     else:
         st.info("No files uploaded yet.")
 
-# Main application logic
 def main():
-    # Security: Prevent access without authentication
-    # This ensures users can't access the app even if they have a shared link
     if 'authenticated' not in st.session_state:
         st.session_state.authenticated = False
     
-    # Authentication gate - redirect all unauthenticated users to login
     if not st.session_state.authenticated:
-        # Clear any potentially cached data for security
         if 'user' in st.session_state:
             del st.session_state.user
         if 'uploaded_files' in st.session_state:
@@ -778,7 +847,6 @@ def main():
         
         show_login_page()
     else:
-        # Verify user session is still valid
         if 'user' not in st.session_state:
             st.session_state.authenticated = False
             st.error("Session expired. Please login again.")

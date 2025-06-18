@@ -7,7 +7,6 @@ import base64
 import gzip
 import json
 
-# For PostgreSQL support
 try:
     import psycopg2
     from sqlalchemy import create_engine, text
@@ -21,7 +20,6 @@ class DatabaseManager:
         self.use_postgres = False
         self.engine = None
         
-        # Check if we're in production with PostgreSQL
         try:
             import streamlit as st
             if hasattr(st, 'secrets') and 'DATABASE_URL' in st.secrets:
@@ -29,8 +27,11 @@ class DatabaseManager:
                     try:
                         self.database_url = st.secrets['DATABASE_URL']
                         self.engine = create_engine(self.database_url)
+                        with self.engine.connect() as conn:
+                            conn.execute(text("SELECT 1"))
                         self.use_postgres = True
-                        print("✅ Connected to PostgreSQL")
+                        print("✅ Connected to PostgreSQL successfully")
+                        print(f"🔗 Database: {self.database_url.split('@')[1].split('/')[0]}")
                     except Exception as e:
                         print(f"❌ PostgreSQL connection failed: {e}")
                         print("🔄 Falling back to SQLite")
@@ -38,7 +39,6 @@ class DatabaseManager:
                 else:
                     print("❌ psycopg2 not available, using SQLite")
         except ImportError:
-            # Streamlit not available (likely in testing)
             pass
         
         if not self.use_postgres:
@@ -47,25 +47,21 @@ class DatabaseManager:
         self.init_database()
     
     def get_connection(self):
-        """Get database connection based on database type"""
         if self.use_postgres:
             return self.engine.connect()
         else:
             return sqlite3.connect(self.db_path)
     
     def init_database(self):
-        """Initialize the database with required tables"""
         if self.use_postgres:
             self.init_postgres_database()
         else:
             self.init_sqlite_database()
     
     def init_sqlite_database(self):
-        """Initialize SQLite database (for local development)"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # Users table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,7 +73,6 @@ class DatabaseManager:
             )
         ''')
         
-        # User data files table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS user_files (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -93,17 +88,15 @@ class DatabaseManager:
             )
         ''')
         
-        # Add compressed_data column if it doesn't exist (for existing databases)
         try:
             cursor.execute('ALTER TABLE user_files ADD COLUMN compressed_data TEXT')
         except sqlite3.OperationalError:
-            pass  # Column already exists
+            pass
         
         conn.commit()
         conn.close()
     
     def init_postgres_database(self):
-        """Initialize PostgreSQL database (for production)"""
         try:
             with self.engine.connect() as conn:
                 # Users table
@@ -141,7 +134,6 @@ class DatabaseManager:
             raise
     
     def create_user(self, username: str, email: str, password: str) -> bool:
-        """Create a new user account"""
         try:
             # Hash the password
             password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
@@ -173,7 +165,6 @@ class DatabaseManager:
             return False
     
     def verify_user(self, username: str, password: str) -> Optional[Dict[str, Any]]:
-        """Verify user credentials and return user data"""
         try:
             if self.use_postgres:
                 with self.engine.connect() as conn:
@@ -213,7 +204,6 @@ class DatabaseManager:
             return None
     
     def update_last_login(self, user_id: int):
-        """Update the last login timestamp for a user"""
         try:
             if self.use_postgres:
                 with self.engine.connect() as conn:
@@ -235,7 +225,6 @@ class DatabaseManager:
             print(f"Error updating last login: {e}")
     
     def save_user_file_with_data(self, user_id: int, filename: str, df: pd.DataFrame, file_type: str) -> int:
-        """Save user file with compressed data"""
         try:
             # Compress the DataFrame
             compressed_data = self.compress_dataframe(df)
@@ -273,7 +262,6 @@ class DatabaseManager:
             return None
     
     def get_user_files(self, user_id: int) -> List[Dict[str, Any]]:
-        """Get all files for a user"""
         try:
             if self.use_postgres:
                 with self.engine.connect() as conn:
@@ -310,7 +298,6 @@ class DatabaseManager:
             return []
     
     def get_file_data(self, file_id: int) -> Optional[pd.DataFrame]:
-        """Get compressed file data and return as DataFrame"""
         try:
             if self.use_postgres:
                 with self.engine.connect() as conn:
@@ -334,7 +321,6 @@ class DatabaseManager:
             return None
     
     def compress_dataframe(self, df: pd.DataFrame) -> str:
-        """Compress DataFrame to base64 string"""
         try:
             # Convert DataFrame to JSON
             json_str = df.to_json(orient='records')
@@ -347,7 +333,6 @@ class DatabaseManager:
             return ""
     
     def decompress_dataframe(self, compressed_data: str) -> pd.DataFrame:
-        """Decompress base64 string to DataFrame"""
         try:
             # Decode from base64
             compressed = base64.b64decode(compressed_data.encode('utf-8'))
@@ -361,7 +346,6 @@ class DatabaseManager:
             return pd.DataFrame()
     
     def delete_user_file(self, file_id: int, user_id: int) -> bool:
-        """Delete a user's file"""
         try:
             if self.use_postgres:
                 with self.engine.connect() as conn:
@@ -384,5 +368,4 @@ class DatabaseManager:
     
     # Keep the old method name for backward compatibility
     def authenticate_user(self, username: str, password: str) -> Optional[Dict[str, Any]]:
-        """Authenticate user login - deprecated, use verify_user instead"""
         return self.verify_user(username, password)
