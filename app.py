@@ -43,7 +43,6 @@ else:
     pass
 
 st.markdown("""
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <style>
     .stApp {
         background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
@@ -319,7 +318,7 @@ def show_login_page():
     <div class="main-header">
         <div class="logo-container">
             <img src="{get_favicon_data_url()}" class="logo-icon" alt="DataLoom Logo">
-            <h1 style="margin: 0;">DataLoom</h1>
+            <div style="margin: 0; font-size: 2.5rem; font-weight: 600; color: inherit;">DataLoom</div>
         </div>
         <p>Professional Analytics Dashboard</p>
     </div>
@@ -328,7 +327,7 @@ def show_login_page():
     tab1, tab2 = st.tabs(["Login", "Sign Up"])
     
     with tab1:
-        st.subheader("Welcome back!")
+        st.subheader("Login Below", anchor=False)
         with st.form("login_form"):
             username = st.text_input("Username")
             password = st.text_input("Password", type="password")
@@ -348,12 +347,12 @@ def show_login_page():
                         st.error("❌ Invalid username or password. Please check your credentials or create an account first.")
     
     with tab2:
-        st.subheader("Create your account")
+        st.subheader("Create your account", anchor=False)
         
         # Show success message if signup was just completed
         if st.session_state.get('signup_success', False):
             st.success("✅ Account created successfully! You can now login with your credentials.")
-            st.info("💡 Please switch to the Login tab to access your account")
+            st.info("Please switch to the Login tab to access your account")
             # Clear the flag and form data
             del st.session_state.signup_success
             # Clear form fields by removing them from session state
@@ -362,7 +361,7 @@ def show_login_page():
                     del st.session_state[key]
         
         # Password requirements info
-        with st.expander("📋 Account Requirements", expanded=False):
+        with st.expander("Account Requirements", expanded=False):
             st.markdown("""
             **Username:**
             - 3-20 characters long
@@ -563,9 +562,9 @@ def show_upload_page():
         - E-commerce Data, IoT Sensor Data
         
         **How to get them:**
-        1. Visit our [GitHub Repository](https://github.com/ag863k/DataLoom)
-        2. Download any `sample_*.csv` file
-        3. Upload it here to start exploring!
+        1. Download sample files from the DataLoom sample data collection
+        2. Upload any `sample_*.csv` file here
+        3. Start exploring your data analytics!
         
         *All sample data is synthetic and safe to use for testing.*
         """)
