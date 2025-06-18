@@ -27,11 +27,16 @@ class DataAnalyzer:
         return datetime_cols
     
     def get_summary_stats(self) -> Dict[str, Any]:
+        try:
+            memory_usage = self.df.memory_usage(deep=True).sum()
+        except Exception:
+            memory_usage = 0
+            
         summary = {
             'basic_info': {
                 'rows': len(self.df),
                 'columns': len(self.df.columns),
-                'memory_usage': self.df.memory_usage(deep=True).sum(),
+                'memory_usage': memory_usage,
                 'missing_values': self.df.isnull().sum().sum()
             },
             'column_types': {
@@ -44,12 +49,10 @@ class DataAnalyzer:
             'missing_data': {}
         }
         
-        # Numeric columns summary
         if self.numeric_columns:
             numeric_stats = self.df[self.numeric_columns].describe()
             summary['numeric_summary'] = numeric_stats.to_dict()
         
-        # Categorical columns summary
         if self.categorical_columns:
             cat_summary = {}
             for col in self.categorical_columns[:5]:
@@ -296,7 +299,11 @@ class DataAnalyzer:
         report.append("-" * 20)
         report.append(f"Rows: {len(self.df):,}")
         report.append(f"Columns: {len(self.df.columns)}")
-        report.append(f"Memory Usage: {self.df.memory_usage(deep=True).sum() / 1024 / 1024:.2f} MB")
+        try:
+            memory_mb = self.df.memory_usage(deep=True).sum() / 1024 / 1024
+            report.append(f"Memory Usage: {memory_mb:.2f} MB")
+        except Exception:
+            report.append("Memory Usage: N/A")
         report.append("")
         
         # Column types

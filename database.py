@@ -133,7 +133,6 @@ class DatabaseManager:
     
     def create_user(self, username: str, email: str, password: str) -> bool:
         try:
-            # Hash the password
             password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
             
             if self.use_postgres:

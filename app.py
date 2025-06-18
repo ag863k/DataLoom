@@ -353,7 +353,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize database
 @st.cache_resource
 def init_database():
     return DatabaseManager()
@@ -396,18 +395,14 @@ def show_login_page():
     with tab2:
         st.subheader("Create your account", anchor=False)
         
-        # Show success message if signup was just completed
         if st.session_state.get('signup_success', False):
             st.success("✅ Account created successfully! You can now login with your credentials.")
             st.info("Please switch to the Login tab to access your account")
-            # Clear the flag and form data
             del st.session_state.signup_success
-            # Clear form fields by removing them from session state
             for key in ['signup_username', 'signup_email', 'signup_password', 'signup_confirm']:
                 if key in st.session_state:
                     del st.session_state[key]
         
-        # Password requirements info
         with st.expander("Account Requirements", expanded=False):
             st.markdown("""
             **Username:**
@@ -459,7 +454,6 @@ def show_login_page():
                     st.error("❌ Passwords do not match. Please check both password fields")
                 else:
                     if db.create_user(new_username, new_email, new_password):
-                        # Set flag to show success message and clear form
                         st.session_state.signup_success = True
                         st.rerun()
                     else:
@@ -504,7 +498,6 @@ def show_dashboard():
         st.markdown("---")
         st.markdown(f"**User:** {user['username']}")
         
-        # Handle different date formats safely
         member_since = "Unknown"
         if user.get('created_at'):
             try:
@@ -517,7 +510,6 @@ def show_dashboard():
         
         st.markdown(f"**Member since:** {member_since}")
         
-        # Analytics summary
         user_files = db.get_user_files(user['id'])
         total_rows = sum([f['rows_count'] or 0 for f in user_files])
         total_columns = sum([f['columns_count'] or 0 for f in user_files])
@@ -527,7 +519,6 @@ def show_dashboard():
             avg_columns = total_columns / len(user_files)
             st.markdown(f"**Avg Columns:** {avg_columns:.0f}")
     
-    # Main content based on selected page
     if page == "Dashboard":
         show_dashboard_page()
     elif page == "Upload Data":
@@ -540,10 +531,8 @@ def show_dashboard():
 def show_dashboard_page():
     user = st.session_state.user
     
-    # Get user files
     user_files = db.get_user_files(user['id'])
     
-    # Dashboard metrics
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -573,7 +562,13 @@ def show_dashboard_page():
         """.format(total_columns), unsafe_allow_html=True)
     
     with col4:
-        last_upload = user_files[0]['upload_date'][:10] if user_files else "Never"
+        if user_files:
+            try:
+                last_upload = str(user_files[0]['upload_date'])[:10] if user_files[0]['upload_date'] else "Never"
+            except (TypeError, AttributeError):
+                last_upload = "Never"
+        else:
+            last_upload = "Never"
         st.markdown("""
         <div class="metric-card">
             <h3>Last Upload</h3>
@@ -583,12 +578,14 @@ def show_dashboard_page():
     
     st.markdown("---")
     
-    # Recent files
     st.subheader("Your Recent Files", anchor=False)
     
     if user_files:
         files_df = pd.DataFrame(user_files)
-        files_df['upload_date'] = pd.to_datetime(files_df['upload_date']).dt.strftime('%Y-%m-%d %H:%M')
+        try:
+            files_df['upload_date'] = pd.to_datetime(files_df['upload_date']).dt.strftime('%Y-%m-%d %H:%M')
+        except Exception:
+            files_df['upload_date'] = files_df['upload_date'].astype(str)
         files_df['file_size_mb'] = (files_df['file_size'] / (1024*1024)).round(2)
         
         display_df = files_df[['filename', 'upload_date', 'rows_count', 'columns_count', 'file_size_mb']].copy()
@@ -601,7 +598,6 @@ def show_dashboard_page():
 def show_upload_page():
     st.subheader("📁 Upload Your Data", anchor=False)
     
-    # Sample Data Information
     with st.expander("🎯 Need Sample Data to Test?", expanded=False):
         st.markdown("""
         **Don't have data to test with?** We've prepared 11 sample datasets for you!
@@ -628,25 +624,21 @@ def show_upload_page():
     )
     
     if uploaded_file is not None:
-        # Check file size limit (50MB)
         max_size = 50 * 1024 * 1024  # 50MB in bytes
         if len(uploaded_file.getvalue()) > max_size:
             st.error("File size exceeds 50MB limit. Please upload a smaller file.")
             return
             
         try:
-            # Read the file
             if uploaded_file.name.endswith('.csv'):
                 df = pd.read_csv(uploaded_file)
             else:
                 df = pd.read_excel(uploaded_file)
             
-            # File info
             file_size = len(uploaded_file.getvalue())
             rows_count = len(df)
             columns_count = len(df.columns)
             
-            # Display preview
             st.success(f"File uploaded successfully! ({rows_count:,} rows, {columns_count} columns, {file_size/1024/1024:.1f} MB)")
             
             col1, col2 = st.columns(2)
@@ -664,19 +656,15 @@ def show_upload_page():
                 })
                 st.dataframe(col_info, use_container_width=True, hide_index=True)
             
-            # Save file button
             if st.button("Save File to DataLoom", use_container_width=True):
                 user = st.session_state.user
                 
                 with st.spinner("Auto-compressing and saving to database..."):
-                    # Determine file type
                     file_type = 'csv' if uploaded_file.name.endswith('.csv') else 'excel'
                     
-                    # Store data in database (method handles compression internally)
                     file_id = db.save_user_file_with_data(user['id'], uploaded_file.name, df, file_type)
                     
                     if file_id:
-                        # Also store in session state for immediate access
                         file_key = f"{user['id']}_{uploaded_file.name}"
                         st.session_state.uploaded_files[file_key] = {
                             'data': df,
@@ -765,7 +753,11 @@ def show_analytics_page():
                 with col3:
                     st.metric("Missing Values", f"{summary['basic_info']['missing_values']:,}")
                 with col4:
-                    st.metric("Memory Usage", f"{summary['basic_info']['memory_usage']/1024/1024:.1f} MB")
+                    try:
+                        memory_mb = summary['basic_info']['memory_usage'] / (1024 * 1024)
+                        st.metric("Memory Usage", f"{memory_mb:.1f} MB")
+                    except (KeyError, TypeError, ZeroDivisionError):
+                        st.metric("Memory Usage", "N/A")
                 
                 # Data types
                 st.subheader("Column Types")
@@ -869,7 +861,6 @@ def show_settings_page():
     
     user = st.session_state.user
     
-    # User profile
     st.write("**User Profile**")
     st.write(f"**Username:** {user['username']}")
     st.write(f"**Email:** {user['email']}")
@@ -886,7 +877,6 @@ def show_settings_page():
     
     st.markdown("---")
     
-    # File management
     st.write("**File Management**")
     user_files = db.get_user_files(user['id'])
     
