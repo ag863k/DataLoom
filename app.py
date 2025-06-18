@@ -147,13 +147,6 @@ def init_database():
 db = init_database()
 
 def show_login_page():
-    # Theme toggle button
-    col1, col2 = st.columns([4, 1])
-    with col2:
-        if st.button("🌓" if st.session_state.theme == 'dark' else "🌙", help="Toggle theme"):
-            st.session_state.theme = 'light' if st.session_state.theme == 'dark' else 'dark'
-            st.rerun()
-    
     st.markdown(f"""
     <div class="main-header">
         <div class="logo-container">
@@ -679,11 +672,6 @@ def main():
     if 'authenticated' not in st.session_state:
         st.session_state.authenticated = False
     
-    # Apply theme styling based on user preference
-    theme_class = 'light-mode' if st.session_state.get('theme', 'dark') == 'light' else ''
-    if theme_class:
-        st.markdown(f'<div class="{theme_class}">', unsafe_allow_html=True)
-    
     # Authentication gate - redirect all unauthenticated users to login
     if not st.session_state.authenticated:
         # Clear any potentially cached data for security
@@ -701,9 +689,6 @@ def main():
             st.rerun()
         else:
             show_dashboard()
-    
-    if theme_class:
-        st.markdown('</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
