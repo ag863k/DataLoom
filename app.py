@@ -354,8 +354,12 @@ def show_login_page():
         if st.session_state.get('signup_success', False):
             st.success("✅ Account created successfully! You can now login with your credentials.")
             st.info("💡 Please switch to the Login tab to access your account")
-            # Clear the flag
+            # Clear the flag and form data
             del st.session_state.signup_success
+            # Clear form fields by removing them from session state
+            for key in ['signup_username', 'signup_email', 'signup_password', 'signup_confirm']:
+                if key in st.session_state:
+                    del st.session_state[key]
         
         # Password requirements info
         with st.expander("📋 Account Requirements", expanded=False):
@@ -375,10 +379,19 @@ def show_login_page():
             """)
         
         with st.form("signup_form"):
-            new_username = st.text_input("Username", help="Choose a unique username (3-20 characters)")
-            new_email = st.text_input("Email Address", placeholder="example@domain.com")
-            new_password = st.text_input("Password", type="password", help="Minimum 8 characters")
-            confirm_password = st.text_input("Confirm Password", type="password")
+            new_username = st.text_input("Username", 
+                                       help="Choose a unique username (3-20 characters)",
+                                       key="signup_username")
+            new_email = st.text_input("Email Address", 
+                                    placeholder="example@domain.com",
+                                    key="signup_email")
+            new_password = st.text_input("Password", 
+                                       type="password", 
+                                       help="Minimum 8 characters",
+                                       key="signup_password")
+            confirm_password = st.text_input("Confirm Password", 
+                                           type="password",
+                                           key="signup_confirm")
             signup_btn = st.form_submit_button("Create Account", use_container_width=True)
             
             if signup_btn:
@@ -817,7 +830,11 @@ def show_settings_page():
     st.write("**User Profile**")
     st.write(f"**Username:** {user['username']}")
     st.write(f"**Email:** {user['email']}")
-    st.write(f"**Member Since:** {user['created_at'][:10] if user['created_at'] else 'Unknown'}")
+    try:
+        member_since_display = str(user['created_at'])[:10] if user['created_at'] else 'Unknown'
+    except (TypeError, AttributeError):
+        member_since_display = 'Unknown'
+    st.write(f"**Member Since:** {member_since_display}")
     try:
         last_login_display = str(user['last_login'])[:16] if user['last_login'] else 'Unknown'
     except (TypeError, AttributeError):
