@@ -350,6 +350,13 @@ def show_login_page():
     with tab2:
         st.subheader("Create your account")
         
+        # Show success message if signup was just completed
+        if st.session_state.get('signup_success', False):
+            st.success("✅ Account created successfully! You can now login with your credentials.")
+            st.info("💡 Please switch to the Login tab to access your account")
+            # Clear the flag
+            del st.session_state.signup_success
+        
         # Password requirements info
         with st.expander("📋 Account Requirements", expanded=False):
             st.markdown("""
@@ -393,8 +400,9 @@ def show_login_page():
                     st.error("❌ Passwords do not match. Please check both password fields")
                 else:
                     if db.create_user(new_username, new_email, new_password):
-                        st.success("✅ Account created successfully! You can now login with your credentials.")
-                        st.info("💡 Please switch to the Login tab to access your account")
+                        # Set flag to show success message and clear form
+                        st.session_state.signup_success = True
+                        st.rerun()
                     else:
                         st.error("❌ Username or email already exists. Please try different credentials.")
 
@@ -436,7 +444,19 @@ def show_dashboard():
         
         st.markdown("---")
         st.markdown(f"**User:** {user['username']}")
-        st.markdown(f"**Member since:** {user['created_at'][:10] if user['created_at'] else 'Unknown'}")
+        
+        # Handle different date formats safely
+        member_since = "Unknown"
+        if user.get('created_at'):
+            try:
+                if isinstance(user['created_at'], str):
+                    member_since = user['created_at'][:10]
+                else:
+                    member_since = str(user['created_at'])[:10]
+            except:
+                member_since = "Unknown"
+        
+        st.markdown(f"**Member since:** {member_since}")
         
         # File storage info
         user_files = db.get_user_files(user['id'])
@@ -798,7 +818,11 @@ def show_settings_page():
     st.write(f"**Username:** {user['username']}")
     st.write(f"**Email:** {user['email']}")
     st.write(f"**Member Since:** {user['created_at'][:10] if user['created_at'] else 'Unknown'}")
-    st.write(f"**Last Login:** {user['last_login'][:16] if user['last_login'] else 'Unknown'}")
+    try:
+        last_login_display = str(user['last_login'])[:16] if user['last_login'] else 'Unknown'
+    except (TypeError, AttributeError):
+        last_login_display = 'Unknown'
+    st.write(f"**Last Login:** {last_login_display}")
     
     st.markdown("---")
     
