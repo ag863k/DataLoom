@@ -11,6 +11,8 @@ SAMPLE_DATA_README.md
 *.md
 !README.md
 
+# Note: assets/ folder is included for favicon and other static resources
+
 # Cache and temporary files
 __pycache__/
 *.pyc

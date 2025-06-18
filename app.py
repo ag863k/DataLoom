@@ -5,10 +5,28 @@ from data_analyzer import DataAnalyzer
 import plotly.express as px
 import os
 from datetime import datetime
+import base64
+
+# Function to load and encode favicon
+def get_favicon_base64():
+    try:
+        with open("assets/favicon.ico", "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    except FileNotFoundError:
+        return None
+
+# Function to get favicon data URL
+def get_favicon_data_url():
+    favicon_b64 = get_favicon_base64()
+    if favicon_b64:
+        return f"data:image/x-icon;base64,{favicon_b64}"
+    else:
+        # Fallback to external icon if favicon not found
+        return "https://cdn-icons-png.flaticon.com/512/2103/2103665.png"
 
 st.set_page_config(
     page_title="DataLoom - Analytics Dashboard",
-    page_icon="📊",
+    page_icon="assets/favicon.ico",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -181,7 +199,7 @@ def show_login_page():
     st.markdown(f"""
     <div class="main-header">
         <div class="logo-container">
-            <img src="https://cdn-icons-png.flaticon.com/512/2103/2103665.png" class="logo-icon" alt="DataLoom Logo">
+            <img src="{get_favicon_data_url()}" class="logo-icon" alt="DataLoom Logo">
             <h1 style="margin: 0;">DataLoom</h1>
         </div>
         <p>Professional Analytics Dashboard</p>
@@ -244,7 +262,7 @@ def show_dashboard():
         st.markdown(f"""
         <div class="main-header">
             <div class="logo-container">
-                <img src="https://cdn-icons-png.flaticon.com/512/2103/2103665.png" class="logo-icon" alt="DataLoom Logo">
+                <img src="{get_favicon_data_url()}" class="logo-icon" alt="DataLoom Logo">
                 <h1 style="margin: 0;">Logged in as {user['username']} 👋</h1>
             </div>
             <p>Your personal DataLoom analytics dashboard</p>
@@ -264,9 +282,9 @@ def show_dashboard():
     
     # Sidebar navigation
     with st.sidebar:
-        st.markdown("""
+        st.markdown(f"""
         <div style="text-align: center; padding: 1rem;">
-            <img src="https://cdn-icons-png.flaticon.com/512/2103/2103665.png" style="width: 32px; height: 32px; filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));">
+            <img src="{get_favicon_data_url()}" style="width: 32px; height: 32px; filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));">
             <h2 style="margin: 0.5rem 0; color: #667eea;">DataLoom</h2>
         </div>
         """, unsafe_allow_html=True)

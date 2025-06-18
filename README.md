@@ -13,7 +13,7 @@ A powerful, production-ready data analytics dashboard built with Streamlit. Data
 - **Data Processing**: Automatic data cleaning and preprocessing
 - **Export Capabilities**: Download processed data and visualizations
 - **Sample Data**: 11 pre-built datasets for testing and learning
-- **Modern UI**: Dark/light theme toggle with professional design
+- **Modern UI**: Dark/light theme toggle with professional design and custom favicon
 - **File Persistence**: Uploaded files are saved and accessible across sessions
 
 ## 📁 Sample Data
@@ -68,6 +68,23 @@ cd DataLoom
 - **Database**: SQLite
 - **Authentication**: bcrypt
 - **Deployment**: Streamlit Cloud
+
+## 📁 Project Structure
+
+```
+DataLoom/
+├── app.py                 # Main Streamlit application
+├── database.py           # Database management and user authentication
+├── data_analyzer.py      # Data analysis and visualization logic
+├── requirements.txt      # Python dependencies
+├── assets/              # Static assets
+│   └── favicon.ico      # Custom favicon for branding
+├── .streamlit/          # Streamlit configuration
+│   ├── config.toml      # App configuration and theming
+│   └── secrets.toml     # Production secrets template
+├── sample_*.csv         # Sample datasets for testing
+└── README.md           # Project documentation
+```
 
 ## 🌐 Live Demo
 
