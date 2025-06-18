@@ -132,9 +132,10 @@ class DatabaseManager:
             raise
     
     def create_user(self, username: str, email: str, password: str) -> bool:
+        username = username.lower().strip() if username else username
+        email = email.lower().strip() if email else email
         try:
             password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-            
             if self.use_postgres:
                 with self.engine.begin() as conn:
                     conn.execute(text('''
@@ -154,13 +155,13 @@ class DatabaseManager:
                 ''', (username, email, password_hash.decode('utf-8')))
                 conn.commit()
                 conn.close()
-            
             return True
         except Exception as e:
             print(f"Error creating user: {e}")
             return False
-    
+
     def verify_user(self, username: str, password: str) -> Optional[Dict[str, Any]]:
+        username = username.lower().strip() if username else username
         try:
             if self.use_postgres:
                 with self.engine.connect() as conn:
@@ -177,7 +178,6 @@ class DatabaseManager:
                 ''', (username,))
                 result = cursor.fetchone()
                 conn.close()
-            
             if result:
                 stored_hash = result[3]
                 # Handle both string and bytes stored hashes

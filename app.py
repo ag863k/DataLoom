@@ -379,8 +379,9 @@ def show_login_page():
             username = st.text_input("Username")
             password = st.text_input("Password", type="password")
             login_btn = st.form_submit_button("Login", use_container_width=True)
-            
             if login_btn:
+                username = username.lower().strip() if username else username
+                # Normalize email if you allow login by email in the future
                 if not username or not password:
                     st.error("⚠️ Please enter both username and password")
                 else:
@@ -392,10 +393,9 @@ def show_login_page():
                         st.rerun()
                     else:
                         st.error("❌ Invalid username or password. Please check your credentials or create an account first.")
-    
+
     with tab2:
         st.subheader("Create your account", anchor=False)
-        
         if st.session_state.get('signup_success', False):
             st.success("✅ Account created successfully! You can now login with your credentials.")
             st.info("Please switch to the Login tab to access your account")
@@ -403,23 +403,19 @@ def show_login_page():
             for key in ['signup_username', 'signup_email', 'signup_password', 'signup_confirm']:
                 if key in st.session_state:
                     del st.session_state[key]
-        
         with st.expander("Account Requirements", expanded=False):
             st.markdown("""
             **Username:**
             - 3-20 characters long
             - Letters, numbers, hyphens (-), and underscores (_) only
-            
             **Email:**
             - Valid email format (e.g., user@domain.com)
             - Will be used for account recovery
-            
             **Password:**
             - Minimum 8 characters
             - Must contain at least one letter and one number
             - Both password fields must match
             """)
-        
         with st.form("signup_form"):
             new_username = st.text_input("Username", 
                                        help="Choose a unique username (3-20 characters)",
@@ -435,12 +431,12 @@ def show_login_page():
                                            type="password",
                                            key="signup_confirm")
             signup_btn = st.form_submit_button("Create Account", use_container_width=True)
-            
             if signup_btn:
                 import re
                 email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
                 username_pattern = r'^[a-zA-Z0-9_-]{3,20}$'
-                
+                new_username = new_username.lower().strip() if new_username else new_username
+                new_email = new_email.lower().strip() if new_email else new_email
                 if not all([new_username, new_email, new_password, confirm_password]):
                     st.error("⚠️ Please fill in all fields")
                 elif not re.match(username_pattern, new_username):
