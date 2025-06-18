@@ -32,6 +32,7 @@ class DatabaseManager:
                         self.use_postgres = True
                         print("✅ Connected to PostgreSQL successfully")
                         print(f"🔗 Database: {self.database_url.split('@')[1].split('/')[0]}")
+                        print("🔧 Initializing database tables...")
                     except Exception as e:
                         print(f"❌ PostgreSQL connection failed: {e}")
                         print("🔄 Falling back to SQLite")
@@ -98,8 +99,7 @@ class DatabaseManager:
     
     def init_postgres_database(self):
         try:
-            with self.engine.connect() as conn:
-                # Users table
+            with self.engine.begin() as conn:
                 conn.execute(text('''
                     CREATE TABLE IF NOT EXISTS users (
                         id SERIAL PRIMARY KEY,
@@ -111,7 +111,6 @@ class DatabaseManager:
                     )
                 '''))
                 
-                # User data files table
                 conn.execute(text('''
                     CREATE TABLE IF NOT EXISTS user_files (
                         id SERIAL PRIMARY KEY,
@@ -127,8 +126,7 @@ class DatabaseManager:
                     )
                 '''))
                 
-                conn.commit()
-                print("✅ PostgreSQL tables initialized")
+                print("✅ PostgreSQL tables initialized successfully")
         except Exception as e:
             print(f"❌ PostgreSQL initialization failed: {e}")
             raise
@@ -139,7 +137,7 @@ class DatabaseManager:
             password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
             
             if self.use_postgres:
-                with self.engine.connect() as conn:
+                with self.engine.begin() as conn:
                     conn.execute(text('''
                         INSERT INTO users (username, email, password_hash)
                         VALUES (:username, :email, :password_hash)
@@ -148,7 +146,6 @@ class DatabaseManager:
                         'email': email,
                         'password_hash': password_hash.decode('utf-8')
                     })
-                    conn.commit()
             else:
                 conn = sqlite3.connect(self.db_path)
                 cursor = conn.cursor()
@@ -206,12 +203,11 @@ class DatabaseManager:
     def update_last_login(self, user_id: int):
         try:
             if self.use_postgres:
-                with self.engine.connect() as conn:
+                with self.engine.begin() as conn:
                     conn.execute(text('''
                         UPDATE users SET last_login = CURRENT_TIMESTAMP
                         WHERE id = :user_id
                     '''), {'user_id': user_id})
-                    conn.commit()
             else:
                 conn = sqlite3.connect(self.db_path)
                 cursor = conn.cursor()
@@ -230,7 +226,7 @@ class DatabaseManager:
             compressed_data = self.compress_dataframe(df)
             
             if self.use_postgres:
-                with self.engine.connect() as conn:
+                with self.engine.begin() as conn:
                     result = conn.execute(text('''
                         INSERT INTO user_files (user_id, filename, file_size, rows_count, columns_count, file_type, compressed_data)
                         VALUES (:user_id, :filename, :file_size, :rows_count, :columns_count, :file_type, :compressed_data)
@@ -244,7 +240,6 @@ class DatabaseManager:
                         'file_type': file_type,
                         'compressed_data': compressed_data
                     })
-                    conn.commit()
                     return result.fetchone()[0]
             else:
                 conn = sqlite3.connect(self.db_path)
@@ -348,11 +343,10 @@ class DatabaseManager:
     def delete_user_file(self, file_id: int, user_id: int) -> bool:
         try:
             if self.use_postgres:
-                with self.engine.connect() as conn:
+                with self.engine.begin() as conn:
                     conn.execute(text('''
                         DELETE FROM user_files WHERE id = :file_id AND user_id = :user_id
                     '''), {'file_id': file_id, 'user_id': user_id})
-                    conn.commit()
             else:
                 conn = sqlite3.connect(self.db_path)
                 cursor = conn.cursor()
