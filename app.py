@@ -517,11 +517,15 @@ def show_dashboard():
         
         st.markdown(f"**Member since:** {member_since}")
         
-        # File storage info
+        # Analytics summary
         user_files = db.get_user_files(user['id'])
-        total_size = sum([f['file_size'] or 0 for f in user_files]) / (1024*1024)  # Convert to MB
-        st.markdown(f"**Files stored:** {len(user_files)}")
-        st.markdown(f"**Storage used:** {total_size:.1f} MB")
+        total_rows = sum([f['rows_count'] or 0 for f in user_files])
+        total_columns = sum([f['columns_count'] or 0 for f in user_files])
+        st.markdown(f"**Total Files:** {len(user_files)}")
+        st.markdown(f"**Total Records:** {total_rows:,}")
+        if user_files:
+            avg_columns = total_columns / len(user_files)
+            st.markdown(f"**Avg Columns:** {avg_columns:.0f}")
     
     # Main content based on selected page
     if page == "Dashboard":
@@ -560,13 +564,13 @@ def show_dashboard_page():
         """.format(total_rows), unsafe_allow_html=True)
     
     with col3:
-        total_size = sum([f['file_size'] or 0 for f in user_files])
+        total_columns = sum([f['columns_count'] or 0 for f in user_files])
         st.markdown("""
         <div class="metric-card">
-            <h3>Storage Used</h3>
-            <h2>{:.1f} MB</h2>
+            <h3>Total Columns</h3>
+            <h2>{:,}</h2>
         </div>
-        """.format(total_size / (1024*1024)), unsafe_allow_html=True)
+        """.format(total_columns), unsafe_allow_html=True)
     
     with col4:
         last_upload = user_files[0]['upload_date'][:10] if user_files else "Never"
@@ -580,7 +584,7 @@ def show_dashboard_page():
     st.markdown("---")
     
     # Recent files
-    st.subheader("Your Recent Files")
+    st.subheader("Your Recent Files", anchor=False)
     
     if user_files:
         files_df = pd.DataFrame(user_files)
@@ -595,7 +599,7 @@ def show_dashboard_page():
         st.info("No files uploaded yet. Go to 'Upload Data' to get started!")
 
 def show_upload_page():
-    st.subheader("📁 Upload Your Data")
+    st.subheader("📁 Upload Your Data", anchor=False)
     
     # Sample Data Information
     with st.expander("🎯 Need Sample Data to Test?", expanded=False):
@@ -615,16 +619,6 @@ def show_upload_page():
         
         *All sample data is synthetic and safe to use for testing.*
         """)
-    
-    st.markdown("""
-    <div class="upload-section">
-        <h3>📂 Drag & Drop Zone</h3>
-        <p><strong>Simply drag your files here or click to browse</strong></p>
-        <p>📄 Supported: CSV, Excel (XLS, XLSX) - Max size: 50MB</p>
-        <p>🔒 Files are automatically compressed and stored securely</p>
-        <p style="color: #4CAF50; font-size: 0.9rem;">✨ Drag and drop enabled for faster uploads!</p>
-    </div>
-    """, unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader(
         "📁 Drag and drop your file here, or click to browse",
@@ -701,7 +695,7 @@ def show_upload_page():
             st.error(f"Error reading file: {str(e)}")
 
 def show_analytics_page():
-    st.subheader("📈 Data Analytics")
+    st.subheader("📈 Data Analytics", anchor=False)
     
     user = st.session_state.user
     user_files = db.get_user_files(user['id'])
@@ -871,7 +865,7 @@ def show_analytics_page():
             st.error(f"Error analyzing file: {str(e)}")
 
 def show_settings_page():
-    st.subheader("⚙️ Settings")
+    st.subheader("⚙️ Settings", anchor=False)
     
     user = st.session_state.user
     
