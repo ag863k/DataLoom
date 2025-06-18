@@ -359,6 +359,32 @@ class DatabaseManager:
             print(f"Error deleting file: {e}")
             return False
     
+    def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
+        email = email.lower().strip() if email else email
+        try:
+            if self.use_postgres:
+                with self.engine.connect() as conn:
+                    result = conn.execute(text('''
+                        SELECT id, username, email FROM users WHERE email = :email
+                    '''), {'email': email}).fetchone()
+            else:
+                conn = sqlite3.connect(self.db_path)
+                cursor = conn.cursor()
+                cursor.execute('''
+                    SELECT id, username, email FROM users WHERE email = ?
+                ''', (email,))
+                result = cursor.fetchone()
+                conn.close()
+            if not result:
+                return None
+            if self.use_postgres:
+                return {'id': result[0], 'username': result[1], 'email': result[2]}
+            else:
+                return {'id': result[0], 'username': result[1], 'email': result[2]}
+        except Exception as e:
+            print(f"Error fetching user by email: {e}")
+            return None
+    
     # Keep the old method name for backward compatibility
     def authenticate_user(self, username: str, password: str) -> Optional[Dict[str, Any]]:
         return self.verify_user(username, password)

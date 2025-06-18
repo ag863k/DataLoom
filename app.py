@@ -442,19 +442,21 @@ def show_login_page():
                 elif not re.match(username_pattern, new_username):
                     st.error("❌ Username must be 3-20 characters long and contain only letters, numbers, hyphens, and underscores")
                 elif not re.match(email_pattern, new_email):
-                    st.error("❌ Please enter a valid email address (example: user@domain.com)")
+                    st.error("❌ Please enter a valid email address (example: abc@example.com, abc@example.net, abc@domain.org)")
                 elif len(new_password) < 8:
                     st.error("❌ Password must be at least 8 characters long")
                 elif not re.search(r'[A-Za-z]', new_password) or not re.search(r'[0-9]', new_password):
                     st.error("❌ Password must contain at least one letter and one number")
                 elif new_password != confirm_password:
                     st.error("❌ Passwords do not match. Please check both password fields")
+                elif db.get_user_by_email(new_email):
+                    st.error("❌ This email address is already in use. Please use a different email or login.")
                 else:
                     if db.create_user(new_username, new_email, new_password):
                         st.session_state.signup_success = True
                         st.rerun()
                     else:
-                        st.error("❌ Username or email already exists. Please try different credentials.")
+                        st.error("❌ Username already exists. Please try a different username.")
 
 def show_dashboard():
     user = st.session_state.user
@@ -561,8 +563,10 @@ def show_dashboard_page():
     with col4:
         if user_files:
             try:
-                last_upload = str(user_files[0]['upload_date'])[:10] if user_files[0]['upload_date'] else "Never"
-            except (TypeError, AttributeError):
+                # Find the file with the latest upload_date
+                latest_file = max(user_files, key=lambda f: f['upload_date'] or "")
+                last_upload = str(latest_file['upload_date'])[:10] if latest_file['upload_date'] else "Never"
+            except (TypeError, AttributeError, ValueError):
                 last_upload = "Never"
         else:
             last_upload = "Never"
