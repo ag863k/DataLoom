@@ -48,7 +48,7 @@ else:
 st.markdown("""
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <style>
-    /* Dark mode as default */
+    /* Mobile-first responsive design */
     .stApp {
         background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
         color: #ffffff;
@@ -56,11 +56,11 @@ st.markdown("""
     
     .main-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 2rem;
+        padding: 1rem;
         border-radius: 15px;
         color: white;
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1rem;
         box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -70,51 +70,49 @@ st.markdown("""
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        flex-wrap: wrap;
     }
     
     .logo-icon {
-        width: 48px;
-        height: 48px;
+        width: 32px;
+        height: 32px;
         filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
     }
     
-    .logo-svg {
-        background: linear-gradient(45deg, #667eea, #764ba2);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-size: 3rem;
-        font-weight: bold;
+    .logo-container h1 {
+        font-size: 1.5rem !important;
+        margin: 0 !important;
     }
     
     .metric-card {
         background: linear-gradient(135deg, #2d2d44 0%, #3d3d5c 100%);
-        padding: 1.5rem;
+        padding: 1rem;
         border-radius: 15px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         border: 1px solid rgba(255, 255, 255, 0.1);
         color: white;
         backdrop-filter: blur(10px);
+        margin-bottom: 1rem;
     }
     
     .metric-card h3 {
         color: #667eea;
         margin-bottom: 0.5rem;
-        font-size: 1rem;
+        font-size: 0.9rem;
     }
     
     .metric-card h2 {
         color: #ffffff;
         margin: 0;
-        font-size: 2rem;
+        font-size: 1.5rem;
         font-weight: bold;
     }
     
     .insight-card {
         background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        padding: 1rem;
+        padding: 0.8rem;
         border-radius: 10px;
         border-left: 4px solid #4CAF50;
         margin: 0.5rem 0;
@@ -125,11 +123,109 @@ st.markdown("""
     .upload-section {
         border: 2px dashed #667eea;
         border-radius: 15px;
-        padding: 2rem;
+        padding: 1rem;
         text-align: center;
         background: linear-gradient(135deg, #2d2d44 0%, #3d3d5c 100%);
         color: white;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Mobile responsive adjustments */
+    @media screen and (max-width: 768px) {
+        .main-header {
+            padding: 1rem 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .logo-container {
+            gap: 0.3rem;
+        }
+        
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+        }
+        
+        .logo-container h1 {
+            font-size: 1.2rem !important;
+        }
+        
+        .metric-card {
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+        
+        .metric-card h2 {
+            font-size: 1.3rem;
+        }
+        
+        .upload-section {
+            padding: 0.8rem;
+        }
+        
+        .insight-card {
+            padding: 0.6rem;
+        }
+        
+        /* Streamlit specific mobile fixes */
+        .stSelectbox > div > div {
+            min-height: 2.5rem;
+        }
+        
+        .stButton > button {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stColumns > div {
+            padding: 0 0.25rem;
+        }
+    }
+    
+    /* Small mobile devices */
+    @media screen and (max-width: 480px) {
+        .main-header {
+            padding: 0.8rem 0.3rem;
+        }
+        
+        .logo-container h1 {
+            font-size: 1rem !important;
+        }
+        
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .metric-card h2 {
+            font-size: 1.1rem;
+        }
+        
+        .metric-card h3 {
+            font-size: 0.8rem;
+        }
+        
+        .upload-section {
+            padding: 0.6rem;
+        }
+        
+        .stButton > button {
+            font-size: 0.9rem;
+            padding: 0.5rem;
+        }
+    }
+    
+    /* Ensure proper text wrapping */
+    .stMarkdown, .stText {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    /* Fix sidebar on mobile */
+    @media screen and (max-width: 768px) {
+        .css-1d391kg {
+            padding: 1rem 0.5rem;
+        }
     }
     
     .sidebar .stSelectbox > div > div {
@@ -372,7 +468,7 @@ def show_upload_page():
         - E-commerce Data, IoT Sensor Data
         
         **How to get them:**
-        1. Visit our [GitHub Repository](https://github.com/yourusername/DataLoom)
+        1. Visit our [GitHub Repository](https://github.com/ag863k/DataLoom)
         2. Download any `sample_*.csv` file
         3. Upload it here to start exploring!
         
