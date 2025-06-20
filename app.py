@@ -354,7 +354,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-@st.cache_resource(version="v3")
+# Use session state for database caching instead of st.cache_resource
 def init_database():
     try:
         return DatabaseManager()
@@ -364,15 +364,19 @@ def init_database():
 
 # Initialize database with error handling and fallback
 def get_database():
-    try:
-        db = init_database()
-        if not hasattr(db, 'get_user_by_email'):
-            st.cache_resource.clear()
-            db = DatabaseManager()
-        return db
-    except Exception as e:
-        st.error(f"Critical database error: {e}")
-        st.stop()
+    # Use session state to cache database connection
+    if 'database_instance' not in st.session_state:
+        try:
+            db = init_database()
+            if not hasattr(db, 'get_user_by_email'):
+                # If database doesn't have required methods, reinitialize
+                db = DatabaseManager()
+            st.session_state.database_instance = db
+        except Exception as e:
+            st.error(f"Critical database error: {e}")
+            st.stop()
+    
+    return st.session_state.database_instance
 
 db = get_database()
 
