@@ -10,12 +10,10 @@ class DataAnalyzer:
         self.datetime_columns = self._detect_datetime_columns()
 
     def _detect_datetime_columns(self) -> List[str]:
-        """Attempt to identify datetime columns from object types."""
         datetime_cols = []
         for col in self.df.columns:
             if self.df[col].dtype == 'object':
                 try:
-                    # Attempt to parse a sample of the column
                     pd.to_datetime(self.df[col].dropna().sample(min(10, len(self.df[col].dropna()))), errors='raise')
                     datetime_cols.append(col)
                 except (ValueError, TypeError):
@@ -23,17 +21,11 @@ class DataAnalyzer:
         return datetime_cols
 
     def get_summary_stats(self) -> Dict[str, Any]:
-        """Get a full summary of the dataframe."""
         summary = {
             'basic_info': {
                 'rows': len(self.df),
                 'columns': len(self.df.columns),
                 'missing_values': int(self.df.isnull().sum().sum())
-            },
-            'column_types': {
-                'numeric': len(self.numeric_columns),
-                'categorical': len(self.categorical_columns),
-                'datetime': len(self.datetime_columns)
             },
             'numeric_summary': pd.DataFrame(),
         }
@@ -42,7 +34,6 @@ class DataAnalyzer:
         return summary
 
     def get_insights(self) -> List[Dict[str, str]]:
-        """Generate key textual insights about the data."""
         insights = []
         rows, cols = self.df.shape
         insights.append({
@@ -50,7 +41,6 @@ class DataAnalyzer:
             'message': f"The dataset contains {rows:,} rows and {cols} columns."
         })
 
-        # Missing data insights
         total_cells = np.prod(self.df.shape)
         missing_count = self.df.isnull().sum().sum()
         if missing_count > 0:
@@ -65,7 +55,6 @@ class DataAnalyzer:
                 'message': "No missing values were detected."
             })
 
-        # Correlation insights
         if len(self.numeric_columns) >= 2:
             corr_matrix = self.df[self.numeric_columns].corr().abs()
             sol = corr_matrix.unstack()
@@ -76,7 +65,6 @@ class DataAnalyzer:
                     'message': f"Found {len(so)//2} pair(s) of highly correlated numeric columns (correlation > 0.8)."
                 })
         
-        # Cardinality insights
         if self.categorical_columns:
             high_cardinality_cols = [
                 col for col in self.categorical_columns 
@@ -85,12 +73,11 @@ class DataAnalyzer:
             if high_cardinality_cols:
                 insights.append({
                     'type': 'Data Cardinality',
-                    'message': f"High cardinality detected in columns: {', '.join(high_cardinality_cols)}. These might be identifiers."
+                    'message': f"High cardinality detected in columns: {', '.join(high_cardinality_cols)}."
                 })
         return insights
 
     def generate_report(self) -> str:
-        """Generate a comprehensive text report of the data analysis."""
         report = ["=" * 50, "DataLoom - Data Analysis Report", "=" * 50, ""]
         summary = self.get_summary_stats()
 

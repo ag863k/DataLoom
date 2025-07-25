@@ -5,15 +5,10 @@ from data_analyzer import DataAnalyzer
 import plotly.express as px
 import re
 
-# --- HELPERS & INITIALIZATION ---
-def get_logo_url():
-    """Returns a professional, neutral logo URL."""
-    return "https://www.svgrepo.com/show/508933/data-analytics.svg"
-
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
     page_title="DataLoom - Analytics Dashboard",
-    page_icon=get_logo_url(),
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -27,12 +22,10 @@ st.markdown("""
     }
     .main-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1rem; border-radius: 15px; color: white;
+        padding: 1.5rem; border-radius: 15px; color: white;
         text-align: center; margin-bottom: 1rem;
         box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
     }
-    .logo-container { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem; }
-    .logo-icon { width: 32px; height: 32px; }
     .metric-card {
         background: linear-gradient(135deg, #2d2d44 0%, #3d3d5c 100%);
         padding: 1rem; border-radius: 15px;
@@ -51,7 +44,7 @@ st.markdown("""
         background: rgba(45, 45, 68, 0.3); padding: 1.5rem; border-radius: 12px;
         border: 1px solid rgba(255, 255, 255, 0.1); margin: 1rem 0;
     }
-    .stForm button[kind="formSubmit"] { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; border: none !important; }
+    .stForm button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; border: none !important; }
     .stTextInput > div > div > input { background: rgba(61, 61, 92, 0.8) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; color: white !important; border-radius: 8px !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -64,40 +57,28 @@ if 'db_manager' not in st.session_state:
     except Exception as e:
         st.error(f"Critical Database Error: {e}")
         st.stop()
-
 db = st.session_state.db_manager
 
 # --- Caching Functions for Performance ---
 @st.cache_data
 def load_cached_file_data(file_id):
-    """Cached function to load and decompress user file data from the database."""
     return db.get_file_data(file_id)
 
 @st.cache_data
 def load_sample_df():
-    """Cached function to load the sample dataset from a URL."""
-    url = "https://raw.githubusercontent.com/flyandlearn/Data-Analyst-Projects/main/superstore_sales_project/Superstore.csv"
+    url = "https://raw.githubusercontent.com/ag863k/DataLoom/main/sample_data/sample_sales_data.csv"
     try:
         return pd.read_csv(url, encoding='latin1')
     except Exception as e:
-        st.error(f"Could not load sample data. Please check the network connection. Error: {e}")
+        st.error(f"Could not load sample data from GitHub. Error: {e}")
         return None
 
-# Initialize core session state variables
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
 # --- AUTHENTICATION PAGES ---
 def show_login_page():
-    st.markdown(f"""
-    <div class="main-header">
-        <div class="logo-container">
-            <img src="{get_logo_url()}" class="logo-icon">
-            <h1 style="margin:0;">DataLoom</h1>
-        </div>
-        <p>Your Professional Analytics Dashboard</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>DataLoom</h1><p>Your Professional Analytics Dashboard</p></div>', unsafe_allow_html=True)
     
     login_tab, signup_tab = st.tabs(["Login", "Sign Up"])
     with login_tab:
@@ -124,14 +105,20 @@ def show_login_page():
                 elif not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', new_email): st.error("Invalid email address.")
                 elif not all([new_username, new_email, new_password]): st.error("Please fill all fields.")
                 elif db.get_user_by_email(new_email): st.error("This email is already registered.")
-                elif db.create_user(new_username, new_email, new_password): st.success("Account created. Please login.")
+                elif db.create_user(new_username, new_email, new_password):
+                    st.success("Account created successfully. Please switch to the Login tab.")
+                    # Clear signup form fields from session state after success
+                    for key in ["signup_user", "signup_email", "signup_pass", "signup_confirm"]:
+                        if key in st.session_state:
+                            del st.session_state[key]
+                    st.rerun()
                 else: st.error("Username already exists.")
 
 # --- MAIN APPLICATION PAGES ---
 def show_dashboard():
     user = st.session_state.user
     with st.sidebar:
-        st.markdown(f'<div style="text-align: center; padding-top: 1rem;"><img src="{get_logo_url()}" style="width: 48px; height: 48px;"><h2 style="color: #667eea;">DataLoom</h2></div>', unsafe_allow_html=True)
+        st.markdown('<div style="text-align: center; padding-top: 1rem;"><h2 style="color: #667eea;">DataLoom</h2></div>', unsafe_allow_html=True)
         st.markdown("---")
         page = st.radio("Navigation", ["Dashboard", "Upload Data", "Analytics", "Settings"], label_visibility="collapsed")
         st.markdown("---")
@@ -163,6 +150,7 @@ def show_dashboard_page():
 
 def show_upload_page():
     st.subheader("Upload Your Data")
+    st.info("Need a file to test? Find sample datasets in the project's GitHub repository: https://github.com/ag863k/DataLoom")
     uploaded_file = st.file_uploader("Drag and drop CSV or Excel files", type=['csv', 'xlsx'])
     if uploaded_file:
         try:
@@ -173,7 +161,7 @@ def show_upload_page():
                 with st.spinner("Compressing and saving..."):
                     if db.save_user_file_with_data(st.session_state.user['id'], uploaded_file.name, df, uploaded_file.type):
                         st.success("File saved successfully.")
-                        load_cached_file_data.clear() # Invalidate cache in case of re-upload
+                        load_cached_file_data.clear()
                     else: st.error("Failed to save the file.")
         except Exception as e: st.error(f"Error processing file: {e}")
 
@@ -217,7 +205,7 @@ def show_analytics_page():
     data_source = st.radio("Choose data to analyze", ("My Uploaded Files", "Load Sample Dataset"), horizontal=True, label_visibility="collapsed")
     df_to_analyze, source_name = None, None
     if data_source == "Load Sample Dataset":
-        st.info("Analyzing a sample superstore sales dataset.")
+        st.info("Analyzing a sample sales dataset from the project's GitHub repository.")
         with st.spinner("Loading sample data..."):
             df_to_analyze = load_sample_df()
             source_name = "sample_sales_data"
@@ -243,8 +231,8 @@ def show_settings_page():
         if st.button("Delete Selected File", type="secondary", use_container_width=True):
             file_id = next((f['id'] for f in user_files if f['filename'] == file_to_delete_name), None)
             if file_id and db.delete_user_file(file_id, st.session_state.user['id']):
-                load_cached_file_data.clear() # Crucial step to invalidate the cache
-                st.success(f"`{file_to_delete_name}` has been deleted.")
+                load_cached_file_data.clear()
+                st.success(f"File '{file_to_delete_name}' has been deleted.")
                 st.rerun()
             else: st.error("Failed to delete file.")
     else: st.info("You have no uploaded files.")

@@ -7,7 +7,6 @@ import base64
 import gzip
 import json
 
-# Conditionally import PostgreSQL libraries
 try:
     import psycopg2
     from sqlalchemy import create_engine, text
@@ -21,7 +20,6 @@ class DatabaseManager:
         self.use_postgres = False
         self.engine = None
         
-        # Check for Streamlit secrets to use PostgreSQL for production
         try:
             import streamlit as st
             if hasattr(st, 'secrets') and 'DATABASE_URL' in st.secrets:
@@ -29,7 +27,6 @@ class DatabaseManager:
                     try:
                         self.database_url = st.secrets['DATABASE_URL']
                         self.engine = create_engine(self.database_url)
-                        # Test connection
                         with self.engine.connect() as conn:
                             conn.execute(text("SELECT 1"))
                         self.use_postgres = True
@@ -40,18 +37,12 @@ class DatabaseManager:
                 else:
                     print("psycopg2 not available. Falling back to SQLite.")
         except ImportError:
-            pass # Running locally without streamlit context
+            pass
         
         if not self.use_postgres:
             print("Using local SQLite database.")
         
         self.init_database()
-
-    def get_connection(self):
-        if self.use_postgres:
-            return self.engine.connect()
-        else:
-            return sqlite3.connect(self.db_path)
 
     def init_database(self):
         if self.use_postgres:
@@ -60,7 +51,7 @@ class DatabaseManager:
             self.init_sqlite_database()
 
     def init_sqlite_database(self):
-        with self.get_connection() as conn:
+        with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS users (
@@ -86,7 +77,6 @@ class DatabaseManager:
                     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
                 )
             ''')
-            conn.commit()
 
     def init_postgres_database(self):
         try:
@@ -131,13 +121,11 @@ class DatabaseManager:
                     conn.execute(text('INSERT INTO users (username, email, password_hash) VALUES (:u, :e, :p)'), 
                                  {'u': username, 'e': email, 'p': password_hash})
             else:
-                with self.get_connection() as conn:
+                with sqlite3.connect(self.db_path) as conn:
                     conn.execute('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
                                  (username, email, password_hash))
             return True
-        except Exception as e:
-            # Handles UNIQUE constraint violation for username/email
-            print(f"Error creating user: {e}")
+        except Exception:
             return False
 
     def verify_user(self, username: str, password: str) -> Optional[Dict[str, Any]]:
@@ -148,9 +136,9 @@ class DatabaseManager:
                 with self.engine.connect() as conn:
                     result = conn.execute(text('SELECT * FROM users WHERE username = :u'), {'u': username}).fetchone()
                     if result:
-                        user_data = result._asdict() # sqlalchemy 2.0+ fetchall() returns Row objects
+                        user_data = result._asdict()
             else:
-                with self.get_connection() as conn:
+                with sqlite3.connect(self.db_path) as conn:
                     conn.row_factory = sqlite3.Row
                     cursor = conn.cursor()
                     cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
@@ -173,7 +161,7 @@ class DatabaseManager:
                 with self.engine.begin() as conn:
                     conn.execute(text('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = :id'), {'id': user_id})
             else:
-                with self.get_connection() as conn:
+                with sqlite3.connect(self.db_path) as conn:
                     conn.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', (user_id,))
         except Exception as e:
             print(f"Error updating last login: {e}")
@@ -205,7 +193,7 @@ class DatabaseManager:
                     })
                     return result.scalar_one_or_none()
             else:
-                with self.get_connection() as conn:
+                with sqlite3.connect(self.db_path) as conn:
                     cursor = conn.cursor()
                     cursor.execute('''
                         INSERT INTO user_files (user_id, filename, file_size, rows_count, columns_count, file_type, compressed_data)
@@ -217,20 +205,17 @@ class DatabaseManager:
             return None
 
     def get_user_files(self, user_id: int) -> List[Dict[str, Any]]:
-        files = []
         try:
             if self.use_postgres:
                 with self.engine.connect() as conn:
                     results = conn.execute(text('SELECT * FROM user_files WHERE user_id = :uid ORDER BY upload_date DESC'), {'uid': user_id}).fetchall()
-                    for row in results:
-                        files.append(row._asdict())
+                    return [row._asdict() for row in results]
             else:
-                with self.get_connection() as conn:
+                with sqlite3.connect(self.db_path) as conn:
                     conn.row_factory = sqlite3.Row
                     cursor = conn.cursor()
                     cursor.execute('SELECT * FROM user_files WHERE user_id = ? ORDER BY upload_date DESC', (user_id,))
-                    files = [dict(row) for row in cursor.fetchall()]
-            return files
+                    return [dict(row) for row in cursor.fetchall()]
         except Exception as e:
             print(f"Error getting user files: {e}")
             return []
@@ -241,7 +226,7 @@ class DatabaseManager:
                 with self.engine.connect() as conn:
                     result = conn.execute(text('SELECT compressed_data FROM user_files WHERE id = :id'), {'id': file_id}).scalar_one_or_none()
             else:
-                with self.get_connection() as conn:
+                with sqlite3.connect(self.db_path) as conn:
                     cursor = conn.cursor()
                     cursor.execute('SELECT compressed_data FROM user_files WHERE id = ?', (file_id,))
                     result = cursor.fetchone()
@@ -261,7 +246,7 @@ class DatabaseManager:
                 with self.engine.begin() as conn:
                     conn.execute(text('DELETE FROM user_files WHERE id = :fid AND user_id = :uid'), {'fid': file_id, 'uid': user_id})
             else:
-                with self.get_connection() as conn:
+                with sqlite3.connect(self.db_path) as conn:
                     conn.execute('DELETE FROM user_files WHERE id = ? AND user_id = ?', (file_id, user_id))
             return True
         except Exception as e:
@@ -276,7 +261,7 @@ class DatabaseManager:
                     result = conn.execute(text('SELECT id, username, email FROM users WHERE email = :email'), {'email': email}).fetchone()
                     return result._asdict() if result else None
             else:
-                with self.get_connection() as conn:
+                with sqlite3.connect(self.db_path) as conn:
                     conn.row_factory = sqlite3.Row
                     cursor = conn.cursor()
                     cursor.execute('SELECT id, username, email FROM users WHERE email = ?', (email,))
