@@ -107,46 +107,46 @@ def show_login_page():
                 if user:
                     st.session_state.authenticated = True
                     st.session_state.user = user
+                    if 'signup_success' in st.session_state:
+                        del st.session_state.signup_success
                     st.rerun()
                 else:
                     st.error("Invalid username or password.")
 
     with signup_tab:
-        with st.expander("View Password Requirements"):
-            st.markdown("""
-            - At least 8 characters long
-            - Contains at least one uppercase letter (A-Z)
-            - Contains at least one lowercase letter (a-z)
-            - Contains at least one number (0-9)
-            - Contains at least one special character (e.g., !@#$%)
-            """)
-        with st.form("signup_form"):
-            new_username = st.text_input("Username", key="signup_user")
-            new_email = st.text_input("Email Address", key="signup_email")
-            new_password = st.text_input("Password", type="password", key="signup_pass")
-            confirm_password = st.text_input("Confirm Password", type="password", key="signup_confirm")
-            
-            if st.form_submit_button("Create Account", use_container_width=True):
-                password_errors = validate_password(new_password)
-                if not all([new_username, new_email, new_password, confirm_password]):
-                    st.error("Please fill all fields.")
-                elif new_password != confirm_password: 
-                    st.error("Passwords do not match.")
-                elif password_errors:
-                    for error in password_errors:
-                        st.error(error)
-                elif not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', new_email):
-                    st.error("Invalid email address format.")
-                elif db.get_user_by_email(new_email):
-                    st.error("This email is already registered.")
-                elif db.create_user(new_username, new_email, new_password):
-                    st.success("Account created successfully. Please switch to the Login tab to sign in.")
-                    for key in ["signup_user", "signup_email", "signup_pass", "signup_confirm"]:
-                        if key in st.session_state:
-                            del st.session_state[key]
-                    st.rerun()
-                else: 
-                    st.error("Username already exists. Please choose another.")
+        if st.session_state.get('signup_success'):
+            st.success("Account created successfully!")
+            st.info("Please switch to the Login tab to sign in with your new credentials.")
+        else:
+            with st.expander("View Password Requirements"):
+                st.markdown("- At least 8 characters long\n- Contains uppercase (A-Z) and lowercase (a-z) letters\n- Contains at least one number (0-9)\n- Contains at least one special character (e.g., !@#$%)")
+            with st.form("signup_form"):
+                new_username = st.text_input("Username", key="signup_user")
+                new_email = st.text_input("Email Address", key="signup_email")
+                new_password = st.text_input("Password", type="password", key="signup_pass")
+                confirm_password = st.text_input("Confirm Password", type="password", key="signup_confirm")
+                
+                if st.form_submit_button("Create Account", use_container_width=True):
+                    password_errors = validate_password(new_password)
+                    if not all([new_username, new_email, new_password, confirm_password]):
+                        st.error("Please fill all fields.")
+                    elif new_password != confirm_password: 
+                        st.error("Passwords do not match.")
+                    elif password_errors:
+                        for error in password_errors:
+                            st.error(error)
+                    elif not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', new_email):
+                        st.error("Invalid email address format.")
+                    elif db.get_user_by_email(new_email):
+                        st.error("This email is already registered.")
+                    elif db.create_user(new_username, new_email, new_password):
+                        st.session_state.signup_success = True
+                        for key in ["signup_user", "signup_email", "signup_pass", "signup_confirm"]:
+                            if key in st.session_state:
+                                del st.session_state[key]
+                        st.rerun()
+                    else: 
+                        st.error("Username already exists. Please choose another.")
 
 # --- MAIN APPLICATION PAGES ---
 def show_dashboard():
