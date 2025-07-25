@@ -46,7 +46,7 @@ class DataAnalyzer:
         insights = []
         rows, cols = self.df.shape
         insights.append({
-            'type': '🔍 Overview',
+            'type': 'Overview',
             'message': f"The dataset contains {rows:,} rows and {cols} columns."
         })
 
@@ -56,12 +56,12 @@ class DataAnalyzer:
         if missing_count > 0:
             missing_pct = (missing_count / total_cells) * 100
             insights.append({
-                'type': '⚠️ Data Quality',
+                'type': 'Data Quality Issue',
                 'message': f"Found {missing_count:,} missing values ({missing_pct:.2f}% of total data)."
             })
         else:
             insights.append({
-                'type': '✅ Data Quality',
+                'type': 'Data Quality',
                 'message': "No missing values were detected."
             })
 
@@ -69,11 +69,11 @@ class DataAnalyzer:
         if len(self.numeric_columns) >= 2:
             corr_matrix = self.df[self.numeric_columns].corr().abs()
             sol = corr_matrix.unstack()
-            so = sol[sol.between(0.8, 1, inclusive='neither')] # Find strong correlations (excluding self-correlation)
+            so = sol[sol.between(0.8, 1, inclusive='neither')]
             if not so.empty:
                 insights.append({
-                    'type': '🔗 Correlation',
-                    'message': f"Found {len(so)//2} pair(s) of highly correlated numeric columns (corr > 0.8)."
+                    'type': 'Correlation',
+                    'message': f"Found {len(so)//2} pair(s) of highly correlated numeric columns (correlation > 0.8)."
                 })
         
         # Cardinality insights
@@ -84,10 +84,9 @@ class DataAnalyzer:
             ]
             if high_cardinality_cols:
                 insights.append({
-                    'type': '🗂️ Cardinality',
+                    'type': 'Data Cardinality',
                     'message': f"High cardinality detected in columns: {', '.join(high_cardinality_cols)}. These might be identifiers."
                 })
-
         return insights
 
     def generate_report(self) -> str:
@@ -95,7 +94,6 @@ class DataAnalyzer:
         report = ["=" * 50, "DataLoom - Data Analysis Report", "=" * 50, ""]
         summary = self.get_summary_stats()
 
-        # Basic Info
         report.append("1. DATASET OVERVIEW")
         report.append("-" * 20)
         report.append(f"Rows: {summary['basic_info']['rows']:,}")
@@ -103,20 +101,18 @@ class DataAnalyzer:
         report.append(f"Missing Values: {summary['basic_info']['missing_values']:,}")
         report.append("")
         
-        # Numeric Summary
         if not summary['numeric_summary'].empty:
             report.append("2. NUMERIC COLUMNS SUMMARY")
             report.append("-" * 20)
             report.append(summary['numeric_summary'].to_string())
             report.append("")
 
-        # Key Insights
         insights = self.get_insights()
         if insights:
             report.append("3. KEY INSIGHTS")
             report.append("-" * 20)
             for insight in insights:
-                report.append(f"• {insight['type']}: {insight['message']}")
+                report.append(f"- {insight['type']}: {insight['message']}")
             report.append("")
 
         report.append("=" * 50)

@@ -33,17 +33,17 @@ class DatabaseManager:
                         with self.engine.connect() as conn:
                             conn.execute(text("SELECT 1"))
                         self.use_postgres = True
-                        print("✅ Connected to PostgreSQL successfully")
+                        print("Connection to PostgreSQL successful.")
                     except Exception as e:
-                        print(f"❌ PostgreSQL connection failed: {e}. Falling back to SQLite.")
+                        print(f"PostgreSQL connection failed: {e}. Falling back to SQLite.")
                         self.use_postgres = False
                 else:
-                    print("⚠️ psycopg2 not available. Falling back to SQLite.")
+                    print("psycopg2 not available. Falling back to SQLite.")
         except ImportError:
             pass # Running locally without streamlit context
         
         if not self.use_postgres:
-            print("📁 Using local SQLite database.")
+            print("Using local SQLite database.")
         
         self.init_database()
 
@@ -115,9 +115,9 @@ class DatabaseManager:
                         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
                     )
                 '''))
-            print("✅ PostgreSQL tables initialized successfully")
+            print("PostgreSQL tables initialized successfully.")
         except Exception as e:
-            print(f"❌ PostgreSQL table initialization failed: {e}")
+            print(f"PostgreSQL table initialization failed: {e}")
             raise
 
     def create_user(self, username: str, email: str, password: str) -> bool:
