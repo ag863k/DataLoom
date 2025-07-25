@@ -134,6 +134,20 @@ temp_*
 *.pem
 config.local.toml
 
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# Ignore all secrets
+secrets*
+*.secret*
+*.key*
+*.pem
+*.crt
+*.pfx
+*.asc
+*.gpg
+*.enc
+
 # Note: .streamlit/secrets.toml is included as template but actual secrets should be added in Streamlit Cloud
 
 # User uploaded files (exclude from deployment)
