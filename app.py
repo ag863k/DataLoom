@@ -4,6 +4,7 @@ from database import DatabaseManager
 from data_analyzer import DataAnalyzer
 import plotly.express as px
 import re
+from typing import List
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -76,6 +77,22 @@ def load_sample_df():
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
+# --- HELPER FUNCTIONS ---
+def validate_password(password: str) -> List[str]:
+    """Validates password strength and returns a list of errors."""
+    errors = []
+    if len(password) < 8:
+        errors.append("Password must be at least 8 characters long.")
+    if not re.search(r'[A-Z]', password):
+        errors.append("Password must contain at least one uppercase letter.")
+    if not re.search(r'[a-z]', password):
+        errors.append("Password must contain at least one lowercase letter.")
+    if not re.search(r'[0-9]', password):
+        errors.append("Password must contain at least one number.")
+    if not re.search(r'[^A-Za-z0-9]', password):
+        errors.append("Password must contain at least one special character.")
+    return errors
+
 # --- AUTHENTICATION PAGES ---
 def show_login_page():
     st.markdown('<div class="main-header"><h1>DataLoom</h1><p>Your Professional Analytics Dashboard</p></div>', unsafe_allow_html=True)
@@ -93,26 +110,43 @@ def show_login_page():
                     st.rerun()
                 else:
                     st.error("Invalid username or password.")
+
     with signup_tab:
+        with st.expander("View Password Requirements"):
+            st.markdown("""
+            - At least 8 characters long
+            - Contains at least one uppercase letter (A-Z)
+            - Contains at least one lowercase letter (a-z)
+            - Contains at least one number (0-9)
+            - Contains at least one special character (e.g., !@#$%)
+            """)
         with st.form("signup_form"):
             new_username = st.text_input("Username", key="signup_user")
             new_email = st.text_input("Email Address", key="signup_email")
             new_password = st.text_input("Password", type="password", key="signup_pass")
             confirm_password = st.text_input("Confirm Password", type="password", key="signup_confirm")
+            
             if st.form_submit_button("Create Account", use_container_width=True):
-                if new_password != confirm_password: st.error("Passwords do not match.")
-                elif len(new_password) < 8: st.error("Password must be at least 8 characters long.")
-                elif not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', new_email): st.error("Invalid email address.")
-                elif not all([new_username, new_email, new_password]): st.error("Please fill all fields.")
-                elif db.get_user_by_email(new_email): st.error("This email is already registered.")
+                password_errors = validate_password(new_password)
+                if not all([new_username, new_email, new_password, confirm_password]):
+                    st.error("Please fill all fields.")
+                elif new_password != confirm_password: 
+                    st.error("Passwords do not match.")
+                elif password_errors:
+                    for error in password_errors:
+                        st.error(error)
+                elif not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', new_email):
+                    st.error("Invalid email address format.")
+                elif db.get_user_by_email(new_email):
+                    st.error("This email is already registered.")
                 elif db.create_user(new_username, new_email, new_password):
-                    st.success("Account created successfully. Please switch to the Login tab.")
-                    # Clear signup form fields from session state after success
+                    st.success("Account created successfully. Please switch to the Login tab to sign in.")
                     for key in ["signup_user", "signup_email", "signup_pass", "signup_confirm"]:
                         if key in st.session_state:
                             del st.session_state[key]
                     st.rerun()
-                else: st.error("Username already exists.")
+                else: 
+                    st.error("Username already exists. Please choose another.")
 
 # --- MAIN APPLICATION PAGES ---
 def show_dashboard():
@@ -143,16 +177,23 @@ def show_dashboard_page():
     st.subheader("Recent Files")
     if user_files:
         files_df = pd.DataFrame(user_files)
-        files_df['upload_date'] = pd.to_datetime(files_df['upload_date']).dt.strftime('%Y-%m-%d %H:%M')
-        files_df['file_size_mb'] = (files_df['file_size'] / (1024*1024)).round(2)
-        st.dataframe(files_df[['filename', 'upload_date', 'rows_count', 'columns_count', 'file_size_mb']], use_container_width=True, hide_index=True, column_config={"filename": "File Name", "upload_date": "Upload Date", "rows_count": "Rows", "columns_count": "Columns", "file_size_mb": "Size (MB)"})
+        st.dataframe(files_df[['filename', 'upload_date', 'rows_count', 'columns_count']], use_container_width=True, hide_index=True, 
+                     column_config={"filename": "File Name", "upload_date": "Upload Date", "rows_count": "Rows", "columns_count": "Columns"})
     else: st.info("No files uploaded. Go to 'Upload Data' to get started.")
 
 def show_upload_page():
     st.subheader("Upload Your Data")
-    st.info("Need a file to test? Find sample datasets in the project's GitHub repository: https://github.com/ag863k/DataLoom")
+    st.info("For additional sample files, please visit the project repository on GitHub: https://github.com/ag863k/DataLoom")
+    
+    MAX_FILE_SIZE_MB = 50
     uploaded_file = st.file_uploader("Drag and drop CSV or Excel files", type=['csv', 'xlsx'])
+    
     if uploaded_file:
+        file_size = len(uploaded_file.getvalue())
+        if file_size > MAX_FILE_SIZE_MB * 1024 * 1024:
+            st.error(f"File size exceeds the {MAX_FILE_SIZE_MB}MB limit. Please upload a smaller file.")
+            return
+
         try:
             df = pd.read_csv(uploaded_file) if uploaded_file.name.endswith('.csv') else pd.read_excel(uploaded_file)
             st.success(f"Successfully loaded `{uploaded_file.name}`")
