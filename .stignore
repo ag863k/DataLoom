@@ -8,6 +8,21 @@ SAMPLE_DATA_README.md
 *.md
 !README.md
 
+# Exclude most sample data files except the primary one
+sample_customer_data.csv
+sample_ecommerce_data.csv
+sample_employee_data.csv
+sample_financial_data.csv
+sample_inventory_data.csv
+sample_iot_sensor_data.csv
+sample_marketing_data.csv
+sample_project_data.csv
+sample_survey_data.csv
+sample_website_analytics_data.csv
+
+# Keep sample_sales_data.csv for deployment
+# !sample_sales_data.csv is already included by default
+
 # Note: assets/ folder is included for favicon and other static resources
 
 # Cache and temporary files

@@ -129,6 +129,10 @@ def load_sample_df():
 
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
+if 'last_activity' not in st.session_state:
+    st.session_state.last_activity = pd.Timestamp.now(tz='UTC')
+if 'login_timestamp' not in st.session_state:
+    st.session_state.login_timestamp = None
 
 def validate_password(password: str) -> List[str]:
     """Validates password strength and returns a list of errors."""
@@ -159,6 +163,19 @@ def render_password_requirements(password: str):
     )
     st.markdown(f'<div class="password-checklist"><strong>Password requirements</strong>{checks}</div>', unsafe_allow_html=True)
 
+def check_session_timeout():
+    """Check if the user session has expired due to inactivity."""
+    if st.session_state.get('authenticated'):
+        TIMEOUT_MINUTES = 30
+        last_activity = st.session_state.get('last_activity')
+        if last_activity:
+            elapsed = (pd.Timestamp.now(tz='UTC') - last_activity).total_seconds() / 60
+            if elapsed > TIMEOUT_MINUTES:
+                st.session_state.clear()
+                st.warning(f"Your session expired after {TIMEOUT_MINUTES} minutes of inactivity. Please login again.")
+                st.rerun()
+        st.session_state.last_activity = pd.Timestamp.now(tz='UTC')
+
 def show_login_page():
     st.markdown('<div class="brand-mark"><span>DATA</span><span>LOOM</span></div>', unsafe_allow_html=True)
     _, auth_column, _ = st.columns([1, 1.25, 1])
@@ -173,6 +190,8 @@ def show_login_page():
                     if user:
                         st.session_state.authenticated = True
                         st.session_state.user = user
+                        st.session_state.login_timestamp = pd.Timestamp.now(tz='UTC')
+                        st.session_state.last_activity = pd.Timestamp.now(tz='UTC')
                         if 'signup_success' in st.session_state:
                             del st.session_state.signup_success
                         st.rerun()
@@ -222,6 +241,7 @@ def render_footer():
     st.markdown('<div class="footer-bar">&copy; 2026 DataLoom. All rights reserved.</div>', unsafe_allow_html=True)
 
 def show_dashboard():
+    check_session_timeout()
     user = st.session_state.user
     with st.sidebar:
         st.markdown('<div style="text-align: center; padding-top: 1rem;"><h2 style="color: #fbda03;">DataLoom</h2></div>', unsafe_allow_html=True)
@@ -229,8 +249,12 @@ def show_dashboard():
         page = st.radio("Navigation", ["Dashboard", "Upload Data", "Analytics", "Settings"], label_visibility="collapsed")
         st.markdown("---")
         st.markdown(f"**Welcome, {user['username']}**")
+        if st.session_state.login_timestamp:
+            session_duration = (pd.Timestamp.now(tz='UTC') - st.session_state.login_timestamp).total_seconds() / 60
+            st.caption(f"Session: {int(session_duration)} min")
         if st.button("Logout", use_container_width=True):
             st.session_state.clear()
+            st.success("You have been logged out successfully.")
             st.rerun()
     st.markdown(f'<div class="main-header"><h1>{page}</h1></div>', unsafe_allow_html=True)
     pages = {"Dashboard": show_dashboard_page, "Upload Data": show_upload_page, "Analytics": show_analytics_page, "Settings": show_settings_page}
@@ -267,7 +291,7 @@ def show_upload_page():
     )
     
     MAX_FILE_SIZE_MB = 50
-    uploaded_file = st.file_uploader("Drag and drop CSV or Excel files", type=['csv', 'xlsx'])
+    uploaded_file = st.file_uploader("Drag and drop CSV or Excel files", type=['csv', 'xlsx'], key="file_uploader")
     
     if uploaded_file:
         file_size = len(uploaded_file.getvalue())
@@ -276,16 +300,37 @@ def show_upload_page():
             return
 
         try:
-            df = pd.read_csv(uploaded_file) if uploaded_file.name.lower().endswith('.csv') else pd.read_excel(uploaded_file)
-            st.success(f"Successfully loaded `{uploaded_file.name}`")
-            st.dataframe(df.head(), use_container_width=True)
-            with st.spinner("Compressing and saving..."):
-                if db.save_user_file_with_data(st.session_state.user['id'], uploaded_file.name, df, uploaded_file.type):
-                    st.success(f"File uploaded successfully at {format_ist_timestamp(pd.Timestamp.now(tz='UTC'))}.")
-                    load_cached_file_data.clear()
-                else:
-                    st.error("Failed to upload the file.")
-        except Exception as e: st.error(f"Error processing file: {e}")
+            if uploaded_file.name.lower().endswith('.csv'):
+                df = pd.read_csv(uploaded_file, encoding='utf-8')
+            elif uploaded_file.name.lower().endswith('.xlsx'):
+                df = pd.read_excel(uploaded_file, engine='openpyxl')
+            else:
+                st.error("Unsupported file format. Please upload CSV or Excel files.")
+                return
+            
+            if df.empty:
+                st.error("The uploaded file is empty. Please upload a file with data.")
+                return
+            
+            st.success(f"Successfully loaded `{uploaded_file.name}` ({len(df)} rows, {len(df.columns)} columns)")
+            st.dataframe(df.head(10), use_container_width=True)
+            
+            if st.button("Save to My Files", type="primary", use_container_width=True):
+                with st.spinner("Compressing and saving..."):
+                    file_id = db.save_user_file_with_data(st.session_state.user['id'], uploaded_file.name, df, uploaded_file.type)
+                    if file_id:
+                        st.success(f"✅ File uploaded successfully at {format_ist_timestamp(pd.Timestamp.now(tz='UTC'))}.")
+                        load_cached_file_data.clear()
+                        st.balloons()
+                    else:
+                        st.error("❌ Failed to upload the file. Please try again.")
+        except pd.errors.EmptyDataError:
+            st.error("The file is empty or corrupted. Please upload a valid file.")
+        except pd.errors.ParserError:
+            st.error("Failed to parse the file. Please ensure it's a valid CSV or Excel file.")
+        except Exception as e: 
+            st.error(f"Error processing file: {str(e)}")
+            st.info("If the issue persists, try converting your file to CSV format and re-upload.")
 
 def display_analysis_ui(analyzer: DataAnalyzer, source_name: str):
     df, summary = analyzer.df, analyzer.get_summary_stats()
@@ -332,6 +377,10 @@ def show_analytics_page():
     user_files = db.get_user_files(st.session_state.user['id'])
     dataset_options = {"Sample dataset - Sales": "sample_sales_data"}
     dataset_options.update({f"Uploaded file - {file['filename']}": file['id'] for file in user_files})
+    
+    if len(dataset_options) == 1:
+        st.info("💡 You haven't uploaded any files yet. Upload a file from the 'Upload Data' page or use the sample dataset.")
+    
     selected_dataset = st.selectbox("Dataset", list(dataset_options), label_visibility="collapsed")
     selected_source = dataset_options[selected_dataset]
 
@@ -341,13 +390,19 @@ def show_analytics_page():
             source_name = selected_source
         else:
             df_to_analyze = load_cached_file_data(selected_source)
+            if df_to_analyze is None:
+                st.error("❌ The selected file could not be loaded. It may have been deleted or corrupted.")
+                st.info("Please select a different file or upload a new one.")
+                return
             source_name = selected_dataset.removeprefix("Uploaded file - ").rsplit('.', 1)[0]
 
     if df_to_analyze is None:
-        st.error("The sample dataset could not be loaded. Refresh the app or upload sample_sales_data.csv from the Upload Data page.")
-    else:
-        st.caption(f"Currently analyzing: {selected_dataset}")
-        display_analysis_ui(DataAnalyzer(df_to_analyze), source_name)
+        st.error("❌ The sample dataset could not be loaded.")
+        st.info("Please refresh the app or upload sample_sales_data.csv from the Upload Data page.")
+        return
+    
+    st.caption(f"Currently analyzing: {selected_dataset}")
+    display_analysis_ui(DataAnalyzer(df_to_analyze), source_name)
 
 def show_settings_page():
     st.subheader("File Management")
@@ -367,8 +422,11 @@ def show_settings_page():
     else: st.info("You have no uploaded files.")
 
 def main():
-    if not st.session_state.get('authenticated'): show_login_page()
-    else: show_dashboard()
+    if not st.session_state.get('authenticated'): 
+        show_login_page()
+    else: 
+        check_session_timeout()
+        show_dashboard()
     render_footer()
 
 if __name__ == "__main__":

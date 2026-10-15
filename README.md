@@ -1,20 +1,20 @@
 # DataLoom
 
-A powerful, production-ready data analytics dashboard built with Streamlit. DataLoom provides a comprehensive platform for data upload, analysis, and visualization with user authentication and multi-user support.
+A production-ready data analytics dashboard built with Streamlit. DataLoom provides a comprehensive platform for data upload, analysis, and visualization with secure user authentication and multi-user support.
 
 ## Features
 
-- **User Authentication**: Secure login and registration system
-- **Data Upload**: Support for CSV and Excel files (persistent storage)
-- **Interactive Analytics**: Comprehensive data analysis with statistical summaries
-- **Data Visualization**: Advanced charts and plots using Plotly and Matplotlib
-- **Multi-user Support**: Each user has their own data workspace
-- **Real-time Dashboard**: Live metrics and insights
-- **Data Processing**: Automatic data cleaning and preprocessing
-- **Export Capabilities**: Download processed data and visualizations
-- **Sample Data**: 11 pre-built datasets for testing and learning
-- **Modern UI**: Dark/light theme toggle with professional design and custom favicon
-- **File Persistence**: Uploaded files are saved and accessible across sessions
+- Secure Authentication: User registration and login with bcrypt password hashing
+- Data Upload: Support for CSV and Excel files with persistent storage
+- Interactive Analytics: Comprehensive data analysis with statistical summaries
+- Data Visualization: Advanced charts and plots using Plotly
+- Multi-user Support: Each user has their own isolated data workspace
+- Real-time Dashboard: Live metrics and insights
+- Data Processing: Automatic data cleaning and preprocessing
+- Export Capabilities: Download processed data and reports
+- Modern UI: Professional dark theme with responsive design
+- Session Management: Automatic logout after 30 minutes of inactivity
+- Production Ready: Works with SQLite locally and PostgreSQL in production
 
 ## Sample Data
 
@@ -61,12 +61,23 @@ cd DataLoom
 
 ## Technology Stack
 
-- **Frontend**: Streamlit
-- **Data Processing**: Pandas, NumPy
-- **Visualizations**: Plotly, Matplotlib, Seaborn
-- **Database**: SQLite
-- **Authentication**: bcrypt
-- **Deployment**: Streamlit Cloud
+- Frontend: Streamlit
+- Data Processing: Pandas, NumPy
+- Visualizations: Plotly, Matplotlib, Seaborn
+- Database: SQLite (local) / PostgreSQL (production)
+- Authentication: bcrypt
+- File Handling: openpyxl
+- Deployment: Streamlit Cloud
+
+## Security Features
+
+- Password Security: Bcrypt hashing with salt
+- Session Management: 30-minute automatic timeout
+- Data Isolation: User data is completely isolated
+- Input Validation: All user inputs are validated and sanitized
+- SQL Injection Prevention: Parameterized queries throughout
+- Secure File Handling: File type and size validation
+- Production Database: PostgreSQL with SSL support
 
 ## Project Structure
 
@@ -88,6 +99,28 @@ DataLoom/
 ## Live Demo
 
 This application is deployed on Streamlit Cloud and ready to use!
+
+## Quick Start
+
+### Local Development
+
+1. Clone the repository
+```bash
+git clone https://github.com/yourusername/DataLoom.git
+cd DataLoom
+```
+
+2. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+3. Run the application
+```bash
+streamlit run app.py
+```
+
+4. Open your browser to `http://localhost:8501`
 
 ## Usage
 
@@ -116,110 +149,39 @@ All required packages are listed in `requirements.txt` and optimized for Streaml
 - User data is isolated and protected
 - Session management for secure authentication
 
-## Streamlit Cloud Deployment
+## Deployment
 
-### Prerequisites
-- GitHub account
-- Streamlit Cloud account (free at [share.streamlit.io](https://share.streamlit.io))
+### Streamlit Cloud
 
-### Step-by-Step Deployment Guide
-
-#### 1. **Prepare Your Repository**
+1. Push to GitHub
 ```bash
-# Initialize git repository (if not already done)
-git init
-
-# Add all files
 git add .
-
-# Commit your changes
-git commit -m "Initial DataLoom deployment"
-
-# Create GitHub repository and push
-git remote add origin https://github.com/yourusername/DataLoom.git
-git branch -M main
-git push -u origin main
+git commit -m "Deploy DataLoom"
+git push origin main
 ```
 
-#### 2. **Deploy to Streamlit Cloud**
-1. Go to [share.streamlit.io](https://share.streamlit.io)
-2. Click "New app"
-3. Connect your GitHub account
-4. Select your DataLoom repository
-5. Set the main file path: `app.py`
-6. Click "Deploy!"
+2. Deploy on Streamlit Cloud
+- Visit [share.streamlit.io](https://share.streamlit.io)
+- Click "New app"
+- Select your repository
+- Deploy
 
-#### 3. **Configuration**
-Your app will automatically:
-- Install dependencies from `requirements.txt`
-- Use the configuration from `.streamlit/config.toml`
-- Create the SQLite database on first run
-- Handle file uploads in the cloud environment
+### Production Database Setup
 
-**Important Files for Deployment:**
-- `.stignore` - Excludes sample data from deployment (keeps it lightweight)
-- `.streamlit/config.toml` - App configuration and theming
-- `.streamlit/secrets.toml.example` - Production secrets template
+For persistent data in production, add PostgreSQL:
 
-### Persistent Database on Streamlit Cloud
-
-SQLite is suitable for local development, but Streamlit Cloud instances can be
-recreated and should not be treated as permanent storage. For persistent users
-and uploaded files, add a PostgreSQL connection string in Streamlit Cloud
-Settings > Secrets. Do not commit the actual secrets file:
-
+1. Get free PostgreSQL from Supabase or ElephantSQL
+2. In Streamlit Cloud Settings, add:
 ```toml
 DATABASE_URL = "postgresql://username:password@host:5432/database"
 ```
-
-The application automatically uses PostgreSQL when `DATABASE_URL` is present
-and falls back to a local SQLite database when it is not.
-
-#### 4. **Post-Deployment**
-- Your app will be available at: `https://yourusername-dataloom-app-xyz.streamlit.app`
-- Users can immediately start creating accounts and uploading data
-- The database and uploaded files persist between sessions
-
-### Troubleshooting
-
-**Common Issues:**
-- **Import errors**: Ensure all packages are in `requirements.txt`
-- **File permissions**: Streamlit Cloud handles file system permissions automatically
-- **Database issues**: SQLite is created automatically on first run
-- **Memory limits**: Streamlit Cloud has generous limits for data processing
-- **Sample data not found**: Sample data files are in GitHub repository, not deployed app
-
-**Sample Data Access:**
-- Download sample CSV files from the GitHub repository
-- Use the upload feature to test with sample data
-- Sample data is excluded from deployment via `.stignore` to keep app lightweight
-
-**Performance Tips:**
-- Large files (>200MB) are automatically handled by the upload size limit
-- Database queries are optimized for cloud performance
-- Caching is implemented for better user experience
-
-### Monitoring Your App
-- View app analytics in your Streamlit Cloud dashboard
-- Monitor usage and performance metrics
-- Check logs for any deployment issues
-
-## Contributing
-
-This is a production-ready application. For feature requests or bug reports, please create an issue.
+3. App automatically switches to PostgreSQL when DATABASE_URL is set
 
 ## License
 
-MIT License - Feel free to use this project for learning and development.
-
-## Next Steps After Deployment
-
-1. **Test Your App**: Visit your deployed URL and test all features
-2. **Share**: Share your DataLoom analytics platform with users
-3. **Monitor**: Check the Streamlit Cloud dashboard for usage statistics
-4. **Scale**: Upgrade to Streamlit Cloud Pro for advanced features if needed
+MIT License
 
 ---
 
-**DataLoom** - Transform your data into insights with ease!
+DataLoom - Transform your data into insights with ease
 
