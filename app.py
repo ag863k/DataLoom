@@ -7,6 +7,7 @@ import re
 from html import escape
 from pathlib import Path
 from typing import List
+from zoneinfo import ZoneInfo
 
 st.set_page_config(
     page_title="DataLoom - Analytics Dashboard",
@@ -66,6 +67,16 @@ if 'db_manager' not in st.session_state:
         st.error(f"Critical Database Error: {e}")
         st.stop()
 db = st.session_state.db_manager
+IST = ZoneInfo("Asia/Kolkata")
+
+def format_ist_timestamp(value, date_only: bool = False) -> str:
+    if not value:
+        return "Never"
+    try:
+        timestamp = pd.to_datetime(value, utc=True).tz_convert(IST)
+        return timestamp.strftime("%Y-%m-%d" if date_only else "%d %b %Y, %I:%M %p IST")
+    except (TypeError, ValueError, OverflowError):
+        return str(value)
 
 @st.cache_data
 def load_cached_file_data(file_id):
@@ -203,12 +214,17 @@ def show_dashboard_page():
     col1.markdown(f'<div class="metric-card"><h3>Total Files</h3><h2>{len(user_files)}</h2></div>', unsafe_allow_html=True)
     col2.markdown(f'<div class="metric-card"><h3>Total Rows</h3><h2>{total_rows:,}</h2></div>', unsafe_allow_html=True)
     last_upload = "Never"
-    if user_files: last_upload = pd.to_datetime(max(user_files, key=lambda f: f['upload_date'])['upload_date']).strftime('%Y-%m-%d')
+    if user_files:
+        last_upload = format_ist_timestamp(
+            max(user_files, key=lambda f: f['upload_date'])['upload_date'],
+            date_only=True
+        )
     col3.markdown(f'<div class="metric-card"><h3>Last Upload</h3><h2>{last_upload}</h2></div>', unsafe_allow_html=True)
     st.markdown("---")
     st.subheader("Recent Files")
     if user_files:
         files_df = pd.DataFrame(user_files)
+        files_df['upload_date'] = files_df['upload_date'].map(format_ist_timestamp)
         st.dataframe(files_df[['filename', 'upload_date', 'rows_count', 'columns_count']], use_container_width=True, hide_index=True, 
                      column_config={"filename": "File Name", "upload_date": "Upload Date", "rows_count": "Rows", "columns_count": "Columns"})
     else: st.info("No files uploaded. Go to 'Upload Data' to get started.")
@@ -227,13 +243,13 @@ def show_upload_page():
             return
 
         try:
-            df = pd.read_csv(uploaded_file) if uploaded_file.name.endswith('.csv') else pd.read_excel(uploaded_file)
+            df = pd.read_csv(uploaded_file) if uploaded_file.name.lower().endswith('.csv') else pd.read_excel(uploaded_file)
             st.success(f"Successfully loaded `{uploaded_file.name}`")
             st.dataframe(df.head(), use_container_width=True)
             if st.button("Save File to DataLoom", use_container_width=True, type="primary"):
                 with st.spinner("Compressing and saving..."):
                     if db.save_user_file_with_data(st.session_state.user['id'], uploaded_file.name, df, uploaded_file.type):
-                        st.success("File saved successfully.")
+                        st.success(f"File saved successfully at {format_ist_timestamp(pd.Timestamp.now(tz='UTC'))}.")
                         load_cached_file_data.clear()
                     else: st.error("Failed to save the file.")
         except Exception as e: st.error(f"Error processing file: {e}")
@@ -279,31 +295,33 @@ def display_analysis_ui(analyzer: DataAnalyzer, source_name: str):
         st.download_button("Download Summary Report", analyzer.generate_report(), f"report_{source_name}.txt", "text/plain", use_container_width=True)
 
 def show_analytics_page():
-    st.subheader("Select Data Source")
-    data_source = st.radio("Choose data to analyze", ("My Uploaded Files", "Load Sample Dataset"), horizontal=True, label_visibility="collapsed")
-    df_to_analyze, source_name = None, None
-    if data_source == "Load Sample Dataset":
-        st.info("Analyzing a sample sales dataset from the project's GitHub repository.")
-        with st.spinner("Loading sample data..."):
+    st.subheader("Choose a dataset to analyze")
+    user_files = db.get_user_files(st.session_state.user['id'])
+    dataset_options = {"Sample dataset - Sales": "sample_sales_data"}
+    dataset_options.update({f"Uploaded file - {file['filename']}": file['id'] for file in user_files})
+    selected_dataset = st.selectbox("Dataset", list(dataset_options), label_visibility="collapsed")
+    selected_source = dataset_options[selected_dataset]
+
+    with st.spinner("Loading dataset..."):
+        if selected_source == "sample_sales_data":
             df_to_analyze = load_sample_df()
-            source_name = "sample_sales_data"
+            source_name = selected_source
+        else:
+            df_to_analyze = load_cached_file_data(selected_source)
+            source_name = selected_dataset.removeprefix("Uploaded file - ").rsplit('.', 1)[0]
+
+    if df_to_analyze is None:
+        st.error("This dataset could not be loaded. Please upload it again or choose another dataset.")
     else:
-        user_files = db.get_user_files(st.session_state.user['id'])
-        if not user_files:
-            st.info("No files found. Please use the 'Upload Data' page to upload a file."); return
-        file_options = {f['filename']: f['id'] for f in user_files}
-        selected_filename = st.selectbox("Select one of your files to analyze", file_options.keys())
-        if selected_filename:
-            with st.spinner("Loading data..."):
-                df_to_analyze = load_cached_file_data(file_options[selected_filename])
-                source_name = selected_filename.split('.')[0]
-    if df_to_analyze is not None: display_analysis_ui(DataAnalyzer(df_to_analyze), source_name)
+        st.caption(f"Currently analyzing: {selected_dataset}")
+        display_analysis_ui(DataAnalyzer(df_to_analyze), source_name)
 
 def show_settings_page():
     st.subheader("File Management")
     user_files = db.get_user_files(st.session_state.user['id'])
     if user_files:
         files_df = pd.DataFrame(user_files)[['filename', 'upload_date', 'rows_count']]
+        files_df['upload_date'] = files_df['upload_date'].map(format_ist_timestamp)
         st.dataframe(files_df, use_container_width=True, hide_index=True)
         file_to_delete_name = st.selectbox("Select a file to delete", [f['filename'] for f in user_files])
         if st.button("Delete Selected File", type="secondary", use_container_width=True):

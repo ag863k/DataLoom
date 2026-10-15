@@ -2,7 +2,7 @@
 
 A powerful, production-ready data analytics dashboard built with Streamlit. DataLoom provides a comprehensive platform for data upload, analysis, and visualization with user authentication and multi-user support.
 
-## 🚀 Features
+## Features
 
 - **User Authentication**: Secure login and registration system
 - **Data Upload**: Support for CSV and Excel files (persistent storage)
@@ -16,7 +16,7 @@ A powerful, production-ready data analytics dashboard built with Streamlit. Data
 - **Modern UI**: Dark/light theme toggle with professional design and custom favicon
 - **File Persistence**: Uploaded files are saved and accessible across sessions
 
-## 📁 Sample Data
+## Sample Data
 
 DataLoom comes with 11 comprehensive sample datasets available in the GitHub repository for testing:
 
@@ -50,7 +50,7 @@ cd DataLoom
 
 **Note**: Sample data files are available in the GitHub repository but not included in the deployed Streamlit Cloud app to keep deployment lightweight.
 
-## 📊 What DataLoom Can Do
+## What DataLoom Can Do
 
 - Automatically detect data types and suggest visualizations
 - Generate statistical summaries and insights
@@ -60,7 +60,7 @@ cd DataLoom
 - Support time series analysis
 - Offer data filtering and querying capabilities
 
-## 🛠 Technology Stack
+## Technology Stack
 
 - **Frontend**: Streamlit
 - **Data Processing**: Pandas, NumPy
@@ -69,7 +69,7 @@ cd DataLoom
 - **Authentication**: bcrypt
 - **Deployment**: Streamlit Cloud
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 DataLoom/
@@ -86,11 +86,11 @@ DataLoom/
 └── README.md           # Project documentation
 ```
 
-## 🌐 Live Demo
+## Live Demo
 
 This application is deployed on Streamlit Cloud and ready to use!
 
-## 📋 Usage
+## Usage
 
 1. **Sign Up/Login**: Create an account or login with existing credentials
 2. **Upload Data**: Upload your CSV or Excel files through the intuitive interface
@@ -99,7 +99,7 @@ This application is deployed on Streamlit Cloud and ready to use!
 5. **Create Visualizations**: Generate interactive charts and plots
 6. **Export Results**: Download your processed data and visualizations
 
-## 🔧 Local Development
+## Local Development
 
 To run DataLoom locally:
 
@@ -107,17 +107,17 @@ To run DataLoom locally:
 2. Install dependencies: `pip install -r requirements.txt`
 3. Run the application: `streamlit run app.py`
 
-## 📦 Dependencies
+## Dependencies
 
 All required packages are listed in `requirements.txt` and optimized for Streamlit Cloud deployment.
 
-## 🔒 Security
+## Security
 
 - Passwords are securely hashed using bcrypt
 - User data is isolated and protected
 - Session management for secure authentication
 
-## 🚀 Streamlit Cloud Deployment
+## Streamlit Cloud Deployment
 
 ### Prerequisites
 - GitHub account
@@ -181,7 +181,7 @@ and falls back to a local SQLite database when it is not.
 - Users can immediately start creating accounts and uploading data
 - The database and uploaded files persist between sessions
 
-### 🔧 Troubleshooting
+### Troubleshooting
 
 **Common Issues:**
 - **Import errors**: Ensure all packages are in `requirements.txt`
@@ -200,20 +200,20 @@ and falls back to a local SQLite database when it is not.
 - Database queries are optimized for cloud performance
 - Caching is implemented for better user experience
 
-### 📊 Monitoring Your App
+### Monitoring Your App
 - View app analytics in your Streamlit Cloud dashboard
 - Monitor usage and performance metrics
 - Check logs for any deployment issues
 
-## 🤝 Contributing
+## Contributing
 
 This is a production-ready application. For feature requests or bug reports, please create an issue.
 
-## 📄 License
+## License
 
 MIT License - Feel free to use this project for learning and development.
 
-## 🎯 Next Steps After Deployment
+## Next Steps After Deployment
 
 1. **Test Your App**: Visit your deployed URL and test all features
 2. **Share**: Share your DataLoom analytics platform with users
