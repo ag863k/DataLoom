@@ -25,46 +25,49 @@ st.markdown("""
     .block-container { max-width: 1200px; padding-top: 2.5rem; padding-bottom: 1rem; }
     .main-header {
         background: #161b22;
-        padding: 1.2rem 1.6rem; border-radius: 8px; color: #e6edf3;
+        padding: 1.2rem 1.6rem; border-radius: 8px; color: #f0f6fc;
         text-align: center; margin: 0 auto 1.25rem;
-        border: 1px solid #30363d; border-left: 4px solid #8b949e;
-        color: #e6edf3; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+        border: 1px solid #242424; border-left: 4px solid #fbda03;
+        color: #f0f6fc; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
     }
     .main-header h1, .main-header p { text-align: center; }
     .main-header h1 { margin-bottom: 0.35rem; }
-    .main-header p { margin-bottom: 0; color: #8b949e; }
+    .main-header h1 { color: #fbda03; }
+    .main-header p { margin-bottom: 0; color: #f0f6fc; }
+    .auth-title { color: #f0f6fc; font-size: 2rem; font-weight: 700; text-align: center; margin: 0.5rem 0 0.2rem; }
+    .auth-tagline { color: #f0f6fc; text-align: center; margin: 0 0 1.25rem; }
     .metric-card {
         background: #161b22;
         padding: 1rem; border-radius: 8px;
-        border: 1px solid #30363d;
+        border: 1px solid #242424;
         color: #e6edf3; margin-bottom: 1rem;
     }
-    .metric-card h3 { color: #8b949e; margin-bottom: 0.5rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .metric-card h3 { color: #f0f6fc; margin-bottom: 0.5rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; }
     .metric-card h2 { color: #f0f6fc; margin: 0; font-size: 1.5rem; font-weight: bold; }
     .insight-card {
         background: #161b22;
-        padding: 0.8rem; border-radius: 6px; border-left: 3px solid #8b949e;
-        margin: 0.5rem 0; color: #c9d1d9; border-top: 1px solid #30363d; border-right: 1px solid #30363d; border-bottom: 1px solid #30363d;
+        padding: 0.8rem; border-radius: 6px; border-left: 3px solid #fbda03;
+        margin: 0.5rem 0; color: #f0f6fc; border-top: 1px solid #242424; border-right: 1px solid #242424; border-bottom: 1px solid #242424;
     }
     .stForm {
         background: #161b22; padding: 1.5rem; border-radius: 8px;
-        border: 1px solid #30363d; margin: 1rem 0;
+        border: 1px solid #242424; margin: 1rem 0;
     }
     .stButton > button, .stForm button { background: #fbda03 !important; color: #000000 !important; border: 1px solid #fbda03 !important; border-radius: 6px !important; font-weight: 600; }
     .stButton > button:hover, .stForm button:hover { background: #d9bb00 !important; color: #000000 !important; border-color: #d9bb00 !important; }
-    .stTextInput > div > div > input { background: #0D0D0D !important; border: 1px solid #484f58 !important; color: #e6edf3 !important; border-radius: 6px !important; }
-    .stTextInput > div > div > input:focus { border-color: #8b949e !important; box-shadow: 0 0 0 1px #8b949e !important; }
-    [data-testid="stSidebar"] { background: #010409; border-right: 1px solid #21262d; color: #f0f6fc; }
+    .stTextInput > div > div > input { background: #0D0D0D !important; border: 1px solid #242424 !important; color: #e6edf3 !important; border-radius: 6px !important; }
+    .stTextInput > div > div > input:focus { border-color: #fbda03 !important; box-shadow: 0 0 0 1px #fbda03 !important; }
+    [data-testid="stSidebar"] { background: #010409; border-right: 1px solid #242424; color: #f0f6fc; }
     [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] { color: #f0f6fc; }
-    [data-testid="stMetric"] { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; }
-    [data-testid="stFileUploader"] { background: #161b22; border: 1px dashed #484f58; border-radius: 8px; padding: 0.5rem; }
-    .upload-helper { color: #8b949e; font-size: 0.9rem; margin: -0.5rem 0 1rem; }
-    .password-checklist { background: #0D0D0D; border: 1px solid #30363d; border-radius: 6px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; color: #8b949e; font-size: 0.9rem; }
+    [data-testid="stMetric"] { background: #161b22; border: 1px solid #242424; border-radius: 8px; padding: 1rem; }
+    [data-testid="stFileUploader"] { background: #161b22; border: 1px dashed #242424; border-radius: 8px; padding: 0.5rem; }
+    .upload-helper { color: #f0f6fc; font-size: 0.9rem; margin: -0.5rem 0 1rem; }
+    .password-checklist { background: #0D0D0D; border: 1px solid #242424; border-radius: 6px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; color: #f0f6fc; font-size: 0.9rem; }
     .password-checklist p { margin: 0.25rem 0; }
     .password-checklist .valid { color: #f0f6fc; }
-    .password-checklist .invalid { color: #888888; }
+    .password-checklist .invalid { color: #f0f6fc; }
     .stTabs [data-baseweb="tab-list"] { justify-content: center; }
-    .footer-bar { border-top: 1px solid #21262d; color: #6e7681; font-size: 0.78rem; text-align: center; padding: 1rem 0 0.25rem; margin-top: 2.5rem; }
+    .footer-bar { border-top: 1px solid #242424; color: #f0f6fc; font-size: 0.78rem; text-align: center; padding: 1rem 0 0.25rem; margin-top: 2.5rem; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -157,6 +160,7 @@ def show_login_page():
                         st.error("Invalid username or password.")
 
         with signup_tab:
+            st.markdown('<div class="auth-title">Create an Account</div><p class="auth-tagline">Focused Data Analysis</p>', unsafe_allow_html=True)
             if st.session_state.get('signup_success'):
                 st.success("Account created successfully!")
                 st.info("Please switch to the Login tab to sign in with your new credentials.")
@@ -195,12 +199,12 @@ def show_login_page():
                             st.error("Account could not be created. Please try again.")
 
 def render_footer():
-    st.markdown('<div class="footer-bar">Copyright DataLoom</div>', unsafe_allow_html=True)
+    st.markdown('<div class="footer-bar">&copy; 2026 DataLoom. All rights reserved.</div>', unsafe_allow_html=True)
 
 def show_dashboard():
     user = st.session_state.user
     with st.sidebar:
-        st.markdown('<div style="text-align: center; padding-top: 1rem;"><h2 style="color: #f2f2f2;">DataLoom</h2></div>', unsafe_allow_html=True)
+        st.markdown('<div style="text-align: center; padding-top: 1rem;"><h2 style="color: #fbda03;">DataLoom</h2></div>', unsafe_allow_html=True)
         st.markdown("---")
         page = st.radio("Navigation", ["Dashboard", "Upload Data", "Analytics", "Settings"], label_visibility="collapsed")
         st.markdown("---")
