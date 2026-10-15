@@ -1,8 +1,5 @@
 # Files to ignore during Streamlit Cloud deployment
-# Sample data files (available in GitHub but not deployed)
-sample_*.csv
-sample_*.xlsx
-sample_*.json
+# Sample data files are included so the built-in analytics dataset works in deployment.
 SAMPLE_DATA_README.md
 
 # Development files

@@ -19,40 +19,42 @@ st.set_page_config(
 st.markdown("""
 <style>
     .stApp {
-        background: #111111;
-        color: #f2f2f2;
+        background: #f7f9f7;
+        color: #1f2922;
     }
     .main-header {
-        background: #1b1b1b;
+        background: #ffffff;
         padding: 1.4rem 1.6rem; border-radius: 8px; color: #f5f5f5;
         text-align: left; margin-bottom: 1.25rem;
-        border: 1px solid #333333; border-left: 4px solid #bdbdbd;
+        border: 1px solid #dce5de; border-left: 4px solid #8bc79a;
+        color: #1f2922; box-shadow: 0 2px 8px rgba(35, 70, 45, 0.06);
     }
     .metric-card {
-        background: #1c1c1c;
+        background: #ffffff;
         padding: 1rem; border-radius: 8px;
-        border: 1px solid #353535;
-        color: #f2f2f2; margin-bottom: 1rem;
+        border: 1px solid #dce5de;
+        color: #1f2922; margin-bottom: 1rem;
     }
-    .metric-card h3 { color: #a6a6a6; margin-bottom: 0.5rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; }
-    .metric-card h2 { color: #ffffff; margin: 0; font-size: 1.5rem; font-weight: bold; }
+    .metric-card h3 { color: #657168; margin-bottom: 0.5rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .metric-card h2 { color: #1f2922; margin: 0; font-size: 1.5rem; font-weight: bold; }
     .insight-card {
-        background: #1c1c1c;
-        padding: 0.8rem; border-radius: 6px; border-left: 3px solid #8f8f8f;
-        margin: 0.5rem 0; color: #e6e6e6;
+        background: #ffffff;
+        padding: 0.8rem; border-radius: 6px; border-left: 3px solid #8bc79a;
+        margin: 0.5rem 0; color: #344239; border-top: 1px solid #e5ece7; border-right: 1px solid #e5ece7; border-bottom: 1px solid #e5ece7;
     }
     .stForm {
-        background: #181818; padding: 1.5rem; border-radius: 8px;
-        border: 1px solid #333333; margin: 1rem 0;
+        background: #ffffff; padding: 1.5rem; border-radius: 8px;
+        border: 1px solid #dce5de; margin: 1rem 0;
     }
-    .stButton > button, .stForm button { background: #e6e6e6 !important; color: #111111 !important; border: 1px solid #e6e6e6 !important; border-radius: 6px !important; font-weight: 600; }
-    .stButton > button:hover, .stForm button:hover { background: #bdbdbd !important; border-color: #bdbdbd !important; }
-    .stTextInput > div > div > input { background: #242424 !important; border: 1px solid #4a4a4a !important; color: #f5f5f5 !important; border-radius: 6px !important; }
-    .stTextInput > div > div > input:focus { border-color: #bdbdbd !important; box-shadow: 0 0 0 1px #bdbdbd !important; }
-    [data-testid="stSidebar"] { background: #181818; border-right: 1px solid #303030; }
-    [data-testid="stMetric"] { background: #1c1c1c; border: 1px solid #353535; border-radius: 8px; padding: 1rem; }
-    [data-testid="stFileUploader"] { background: #1c1c1c; border: 1px dashed #555555; border-radius: 8px; padding: 0.5rem; }
-    .password-checklist { background: #202020; border: 1px solid #363636; border-radius: 6px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; color: #bdbdbd; font-size: 0.9rem; }
+    .stButton > button, .stForm button { background: #b7dfbf !important; color: #1f2922 !important; border: 1px solid #8bc79a !important; border-radius: 6px !important; font-weight: 600; }
+    .stButton > button:hover, .stForm button:hover { background: #8bc79a !important; border-color: #72b983 !important; }
+    .stTextInput > div > div > input { background: #ffffff !important; border: 1px solid #c9d5cc !important; color: #1f2922 !important; border-radius: 6px !important; }
+    .stTextInput > div > div > input:focus { border-color: #72b983 !important; box-shadow: 0 0 0 1px #72b983 !important; }
+    [data-testid="stSidebar"] { background: #eef4ef; border-right: 1px solid #d5e1d7; }
+    [data-testid="stMetric"] { background: #ffffff; border: 1px solid #dce5de; border-radius: 8px; padding: 1rem; }
+    [data-testid="stFileUploader"] { background: #ffffff; border: 1px dashed #9fc9a8; border-radius: 8px; padding: 0.5rem; }
+    .upload-helper { color: #6c776f; font-size: 0.9rem; margin: -0.5rem 0 1rem; }
+    .password-checklist { background: #f0f6f1; border: 1px solid #cfe2d2; border-radius: 6px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; color: #526158; font-size: 0.9rem; }
     .password-checklist p { margin: 0.25rem 0; }
     .password-checklist .valid { color: #d7d7d7; }
     .password-checklist .invalid { color: #888888; }
@@ -92,8 +94,7 @@ def load_sample_df():
             "https://raw.githubusercontent.com/ag863k/DataLoom/main/sample_sales_data.csv",
             encoding='latin1'
         )
-    except Exception as e:
-        st.error(f"Could not load the sample dataset: {e}")
+    except Exception:
         return None
 
 if 'authenticated' not in st.session_state:
@@ -230,8 +231,12 @@ def show_dashboard_page():
     else: st.info("No files uploaded. Go to 'Upload Data' to get started.")
 
 def show_upload_page():
-    st.subheader("Upload Your Data")
-    st.markdown("Additional sample files: [Link](https://mega.nz/folder/JF031ZrJ#2C1eypfC7u0aBZvF_mdYxA)")
+    st.subheader("Upload Data")
+    st.markdown(
+        '<p class="upload-helper">For additional files, refer to: '
+        '<a href="https://mega.nz/folder/JF031ZrJ#2C1eypfC7u0aBZvF_mdYxA" target="_blank">Link</a></p>',
+        unsafe_allow_html=True
+    )
     
     MAX_FILE_SIZE_MB = 50
     uploaded_file = st.file_uploader("Drag and drop CSV or Excel files", type=['csv', 'xlsx'])
@@ -246,7 +251,7 @@ def show_upload_page():
             df = pd.read_csv(uploaded_file) if uploaded_file.name.lower().endswith('.csv') else pd.read_excel(uploaded_file)
             st.success(f"Successfully loaded `{uploaded_file.name}`")
             st.dataframe(df.head(), use_container_width=True)
-            if st.button("Save File to DataLoom", use_container_width=True, type="primary"):
+            if st.button("Upload Data", use_container_width=True, type="primary"):
                 with st.spinner("Compressing and saving..."):
                     if db.save_user_file_with_data(st.session_state.user['id'], uploaded_file.name, df, uploaded_file.type):
                         st.success(f"File saved successfully at {format_ist_timestamp(pd.Timestamp.now(tz='UTC'))}.")
@@ -311,7 +316,7 @@ def show_analytics_page():
             source_name = selected_dataset.removeprefix("Uploaded file - ").rsplit('.', 1)[0]
 
     if df_to_analyze is None:
-        st.error("This dataset could not be loaded. Please upload it again or choose another dataset.")
+        st.error("The sample dataset is unavailable. Please confirm sample_sales_data.csv is included in the deployment.")
     else:
         st.caption(f"Currently analyzing: {selected_dataset}")
         display_analysis_ui(DataAnalyzer(df_to_analyze), source_name)
