@@ -102,23 +102,29 @@ def load_cached_file_data(file_id):
 
 @st.cache_data
 def load_sample_df():
-    candidate_paths = [
-        Path(__file__).resolve().parent / "sample_sales_data.csv",
+    local_paths = [
+        Path(__file__).parent / "sample_sales_data.csv",
         Path.cwd() / "sample_sales_data.csv",
     ]
-    for sample_path in candidate_paths:
+    for sample_path in local_paths:
         if sample_path.is_file():
             try:
                 return pd.read_csv(sample_path, encoding='latin1')
             except (OSError, ValueError, pd.errors.ParserError):
                 continue
-    try:
-        return pd.read_csv(
-            "https://raw.githubusercontent.com/ag863k/DataLoom/main/sample_sales_data.csv",
-            encoding='latin1'
-        )
-    except Exception:
-        return None
+    remote_urls = [
+        "https://raw.githubusercontent.com/ag863k/DataLoom/main/sample_sales_data.csv",
+        "https://github.com/ag863k/DataLoom/raw/refs/heads/main/sample_sales_data.csv",
+    ]
+    for url in remote_urls:
+        try:
+            sample_df = pd.read_csv(url, encoding='latin1')
+            if not sample_df.empty:
+                return sample_df
+        except Exception:
+            continue
+    st.error("Sample sales data could not be loaded from the bundled file or GitHub. Please refresh the app.")
+    return None
 
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
