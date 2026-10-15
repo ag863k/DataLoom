@@ -176,27 +176,9 @@ def show_login_page():
                 st.success("Account created successfully!")
                 st.info("Please switch to the Login tab to sign in with your new credentials.")
             else:
-                new_username = st.text_input("Username", key="signup_user")
-                username_value = new_username.strip()
-                if username_value and re.match(r'^[a-zA-Z0-9_]{3,30}$', username_value):
-                    if db.get_user_by_username(username_value):
-                        st.error("Username or email is already registered. Please choose another.")
-                    else:
-                        st.caption("Username is available.")
-                elif username_value:
-                    st.caption("Use 3-30 letters, numbers, or underscores.")
-
-                new_email = st.text_input("Email Address", key="signup_email")
-                email_value = new_email.strip().lower()
-                if email_value and re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email_value):
-                    if db.get_user_by_email(email_value):
-                        st.error("Username or email is already registered. Please choose another.")
-                    else:
-                        st.caption("Email is available.")
-                elif email_value:
-                    st.caption("Enter a valid email address.")
-
                 with st.form("signup_form"):
+                    new_username = st.text_input("Username", key="signup_user")
+                    new_email = st.text_input("Email Address", key="signup_email")
                     new_password = st.text_input("Password", type="password", key="signup_pass")
                     confirm_password = st.text_input("Confirm Password", type="password", key="signup_confirm")
                     render_password_requirements(new_password)
