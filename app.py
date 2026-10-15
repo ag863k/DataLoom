@@ -19,44 +19,45 @@ st.set_page_config(
 st.markdown("""
 <style>
     .stApp {
-        background: #f7f9f7;
-        color: #1f2922;
+        background: #f5f5f5;
+        color: #171717;
     }
     .main-header {
         background: #ffffff;
-        padding: 1.4rem 1.6rem; border-radius: 8px; color: #f5f5f5;
+        padding: 1.4rem 1.6rem; border-radius: 8px; color: #171717;
         text-align: left; margin-bottom: 1.25rem;
-        border: 1px solid #dce5de; border-left: 4px solid #8bc79a;
-        color: #1f2922; box-shadow: 0 2px 8px rgba(35, 70, 45, 0.06);
+        border: 1px solid #d6d6d6; border-left: 4px solid #171717;
+        color: #171717; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     }
     .metric-card {
         background: #ffffff;
         padding: 1rem; border-radius: 8px;
-        border: 1px solid #dce5de;
-        color: #1f2922; margin-bottom: 1rem;
+        border: 1px solid #d6d6d6;
+        color: #171717; margin-bottom: 1rem;
     }
-    .metric-card h3 { color: #657168; margin-bottom: 0.5rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; }
-    .metric-card h2 { color: #1f2922; margin: 0; font-size: 1.5rem; font-weight: bold; }
+    .metric-card h3 { color: #666666; margin-bottom: 0.5rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .metric-card h2 { color: #171717; margin: 0; font-size: 1.5rem; font-weight: bold; }
     .insight-card {
         background: #ffffff;
-        padding: 0.8rem; border-radius: 6px; border-left: 3px solid #8bc79a;
-        margin: 0.5rem 0; color: #344239; border-top: 1px solid #e5ece7; border-right: 1px solid #e5ece7; border-bottom: 1px solid #e5ece7;
+        padding: 0.8rem; border-radius: 6px; border-left: 3px solid #555555;
+        margin: 0.5rem 0; color: #333333; border-top: 1px solid #e1e1e1; border-right: 1px solid #e1e1e1; border-bottom: 1px solid #e1e1e1;
     }
     .stForm {
         background: #ffffff; padding: 1.5rem; border-radius: 8px;
-        border: 1px solid #dce5de; margin: 1rem 0;
+        border: 1px solid #d6d6d6; margin: 1rem 0;
     }
-    .stButton > button, .stForm button { background: #b7dfbf !important; color: #1f2922 !important; border: 1px solid #8bc79a !important; border-radius: 6px !important; font-weight: 600; }
-    .stButton > button:hover, .stForm button:hover { background: #8bc79a !important; border-color: #72b983 !important; }
-    .stTextInput > div > div > input { background: #ffffff !important; border: 1px solid #c9d5cc !important; color: #1f2922 !important; border-radius: 6px !important; }
-    .stTextInput > div > div > input:focus { border-color: #72b983 !important; box-shadow: 0 0 0 1px #72b983 !important; }
-    [data-testid="stSidebar"] { background: #eef4ef; border-right: 1px solid #d5e1d7; }
-    [data-testid="stMetric"] { background: #ffffff; border: 1px solid #dce5de; border-radius: 8px; padding: 1rem; }
-    [data-testid="stFileUploader"] { background: #ffffff; border: 1px dashed #9fc9a8; border-radius: 8px; padding: 0.5rem; }
-    .upload-helper { color: #6c776f; font-size: 0.9rem; margin: -0.5rem 0 1rem; }
-    .password-checklist { background: #f0f6f1; border: 1px solid #cfe2d2; border-radius: 6px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; color: #526158; font-size: 0.9rem; }
+    .stButton > button, .stForm button { background: #171717 !important; color: #ffffff !important; border: 1px solid #171717 !important; border-radius: 6px !important; font-weight: 600; }
+    .stButton > button:hover, .stForm button:hover { background: #444444 !important; border-color: #444444 !important; }
+    .stTextInput > div > div > input { background: #ffffff !important; border: 1px solid #bdbdbd !important; color: #171717 !important; border-radius: 6px !important; }
+    .stTextInput > div > div > input:focus { border-color: #171717 !important; box-shadow: 0 0 0 1px #171717 !important; }
+    [data-testid="stSidebar"] { background: #202020; border-right: 1px solid #333333; color: #ffffff; }
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] { color: #ffffff; }
+    [data-testid="stMetric"] { background: #ffffff; border: 1px solid #d6d6d6; border-radius: 8px; padding: 1rem; }
+    [data-testid="stFileUploader"] { background: #ffffff; border: 1px dashed #999999; border-radius: 8px; padding: 0.5rem; }
+    .upload-helper { color: #666666; font-size: 0.9rem; margin: -0.5rem 0 1rem; }
+    .password-checklist { background: #f0f0f0; border: 1px solid #d0d0d0; border-radius: 6px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; color: #444444; font-size: 0.9rem; }
     .password-checklist p { margin: 0.25rem 0; }
-    .password-checklist .valid { color: #d7d7d7; }
+    .password-checklist .valid { color: #222222; }
     .password-checklist .invalid { color: #888888; }
 </style>
 """, unsafe_allow_html=True)
