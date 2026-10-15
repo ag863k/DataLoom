@@ -231,7 +231,7 @@ def show_dashboard_page():
 
 def show_upload_page():
     st.subheader("Upload Your Data")
-    st.info("For additional sample files, please visit the project repository on GitHub: https://github.com/ag863k/DataLoom")
+    st.markdown("Additional sample files: [Link](https://mega.nz/folder/JF031ZrJ#2C1eypfC7u0aBZvF_mdYxA)")
     
     MAX_FILE_SIZE_MB = 50
     uploaded_file = st.file_uploader("Drag and drop CSV or Excel files", type=['csv', 'xlsx'])

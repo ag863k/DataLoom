@@ -18,7 +18,7 @@ A powerful, production-ready data analytics dashboard built with Streamlit. Data
 
 ## Sample Data
 
-DataLoom comes with 11 comprehensive sample datasets available in the GitHub repository for testing:
+DataLoom comes with 11 comprehensive sample datasets for testing.
 
 1. **Sales Data** - E-commerce sales analytics
 2. **Customer Data** - CRM and customer analytics  
@@ -34,10 +34,9 @@ DataLoom comes with 11 comprehensive sample datasets available in the GitHub rep
 
 ### How to Use Sample Data
 
-**Option 1: Download from GitHub**
-1. Visit the [GitHub repository](https://github.com/yourusername/DataLoom)
-2. Download individual sample CSV files (e.g., `sample_sales_data.csv`)
-3. Upload them using DataLoom's file upload feature
+**Option 1: Download sample data**
+1. Download the required CSV file (e.g., `sample_sales_data.csv`)
+2. Upload them using DataLoom's file upload feature
 
 **Option 2: Clone Repository**
 ```bash
