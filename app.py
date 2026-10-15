@@ -19,9 +19,10 @@ st.set_page_config(
 st.markdown("""
 <style>
     .stApp {
-        background: radial-gradient(ellipse at 50% -12%, rgba(251, 218, 3, 0.16) 0%, rgba(13, 13, 13, 0) 42%), #0D0D0D;
+        background: #0D0D0D;
         color: #e6edf3;
     }
+    .stApp::before { content: ""; position: fixed; inset: -18%; z-index: -1; background: radial-gradient(ellipse at 50% 18%, rgba(251, 218, 3, 0.52) 0%, rgba(251, 218, 3, 0.22) 24%, rgba(13, 13, 13, 0) 62%); filter: blur(90px); pointer-events: none; }
     .block-container { max-width: 1200px; padding-top: 2.5rem; padding-bottom: 1rem; }
     .main-header {
         background: transparent;
@@ -30,7 +31,8 @@ st.markdown("""
         box-shadow: none;
     }
     .main-header h1 { color: #fbda03; margin: 0; }
-    .brand-mark { color: #fbda03; font-size: 1.55rem; font-weight: 700; letter-spacing: 0.01em; text-align: center; margin: 0 0 2.5rem; text-shadow: 0 0 24px rgba(251, 218, 3, 0.28); }
+    .brand-mark { color: #fbda03; font-size: clamp(2.8rem, 7vw, 5.75rem); font-weight: 800; line-height: 0.82; letter-spacing: 0.08em; text-align: center; margin: 0 0 3.5rem; text-shadow: 0 0 34px rgba(251, 218, 3, 0.32); }
+    .brand-mark span { display: block; }
     .auth-title { color: #f0f6fc; font-size: 2rem; font-weight: 700; text-align: center; margin: 0.5rem 0 0.2rem; }
     .auth-tagline { color: #f0f6fc; text-align: center; margin: 0 0 1.25rem; }
     .metric-card {
@@ -140,7 +142,7 @@ def render_password_requirements(password: str):
     st.markdown(f'<div class="password-checklist"><strong>Password requirements</strong>{checks}</div>', unsafe_allow_html=True)
 
 def show_login_page():
-    st.markdown('<div class="brand-mark">DataLoom</div>', unsafe_allow_html=True)
+    st.markdown('<div class="brand-mark"><span>DATA</span><span>LOOM</span></div>', unsafe_allow_html=True)
     _, auth_column, _ = st.columns([1, 1.25, 1])
     with auth_column:
         login_tab, signup_tab = st.tabs(["Login", "Sign Up"])
@@ -160,7 +162,7 @@ def show_login_page():
                         st.error("Invalid username or password.")
 
         with signup_tab:
-            st.markdown('<div class="auth-title">Create your account</div><p class="auth-tagline">Focused Data Analysis</p>', unsafe_allow_html=True)
+            st.markdown('<div class="auth-title">Create your account</div>', unsafe_allow_html=True)
             if st.session_state.get('signup_success'):
                 st.success("Account created successfully!")
                 st.info("Please switch to the Login tab to sign in with your new credentials.")
