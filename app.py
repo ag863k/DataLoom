@@ -22,13 +22,17 @@ st.markdown("""
         background: #0D0D0D;
         color: #e6edf3;
     }
+    .block-container { max-width: 1200px; padding-top: 2.5rem; padding-bottom: 1rem; }
     .main-header {
         background: #161b22;
-        padding: 1.4rem 1.6rem; border-radius: 8px; color: #e6edf3;
-        text-align: left; margin-bottom: 1.25rem;
+        padding: 1.2rem 1.6rem; border-radius: 8px; color: #e6edf3;
+        text-align: center; margin: 0 auto 1.25rem;
         border: 1px solid #30363d; border-left: 4px solid #8b949e;
         color: #e6edf3; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
     }
+    .main-header h1, .main-header p { text-align: center; }
+    .main-header h1 { margin-bottom: 0.35rem; }
+    .main-header p { margin-bottom: 0; color: #8b949e; }
     .metric-card {
         background: #161b22;
         padding: 1rem; border-radius: 8px;
@@ -46,8 +50,8 @@ st.markdown("""
         background: #161b22; padding: 1.5rem; border-radius: 8px;
         border: 1px solid #30363d; margin: 1rem 0;
     }
-    .stButton > button, .stForm button { background: #f2f2f2 !important; color: #000000 !important; border: 1px solid #f2f2f2 !important; border-radius: 6px !important; font-weight: 600; }
-    .stButton > button:hover, .stForm button:hover { background: #d8d8d8 !important; color: #000000 !important; border-color: #d8d8d8 !important; }
+    .stButton > button, .stForm button { background: #fbda03 !important; color: #000000 !important; border: 1px solid #fbda03 !important; border-radius: 6px !important; font-weight: 600; }
+    .stButton > button:hover, .stForm button:hover { background: #d9bb00 !important; color: #000000 !important; border-color: #d9bb00 !important; }
     .stTextInput > div > div > input { background: #0D0D0D !important; border: 1px solid #484f58 !important; color: #e6edf3 !important; border-radius: 6px !important; }
     .stTextInput > div > div > input:focus { border-color: #8b949e !important; box-shadow: 0 0 0 1px #8b949e !important; }
     [data-testid="stSidebar"] { background: #010409; border-right: 1px solid #21262d; color: #f0f6fc; }
@@ -59,6 +63,8 @@ st.markdown("""
     .password-checklist p { margin: 0.25rem 0; }
     .password-checklist .valid { color: #f0f6fc; }
     .password-checklist .invalid { color: #888888; }
+    .stTabs [data-baseweb="tab-list"] { justify-content: center; }
+    .footer-bar { border-top: 1px solid #21262d; color: #6e7681; font-size: 0.78rem; text-align: center; padding: 1rem 0 0.25rem; margin-top: 2.5rem; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -132,67 +138,64 @@ def render_password_requirements(password: str):
 
 def show_login_page():
     st.markdown('<div class="main-header"><h1>DataLoom</h1><p>Private, focused data analysis.</p></div>', unsafe_allow_html=True)
-    
-    login_tab, signup_tab = st.tabs(["Login", "Sign Up"])
-    with login_tab:
-        with st.form("login_form"):
-            username = st.text_input("Username", key="login_user")
-            password = st.text_input("Password", type="password", key="login_pass")
-            if st.form_submit_button("Login", use_container_width=True):
-                user = db.verify_user(username, password)
-                if user:
-                    st.session_state.authenticated = True
-                    st.session_state.user = user
-                    if 'signup_success' in st.session_state:
-                        del st.session_state.signup_success
-                    st.rerun()
-                else:
-                    st.error("Invalid username or password.")
-
-    with signup_tab:
-        if st.session_state.get('signup_success'):
-            st.success("Account created successfully!")
-            st.info("Please switch to the Login tab to sign in with your new credentials.")
-        else:
-            with st.form("signup_form"):
-                new_username = st.text_input("Username", key="signup_user")
-                new_email = st.text_input("Email Address", key="signup_email")
-                new_password = st.text_input("Password", type="password", key="signup_pass")
-                confirm_password = st.text_input("Confirm Password", type="password", key="signup_confirm")
-                render_password_requirements(new_password)
-
-                if st.form_submit_button("Create Account", use_container_width=True):
-                    new_username = new_username.strip()
-                    new_email = new_email.strip().lower()
-                    password_errors = validate_password(new_password)
-                    if not new_username or not new_email or not new_password or not confirm_password:
-                        st.error("Please complete every field.")
-                    elif not re.match(r'^[a-zA-Z0-9_]{3,30}$', new_username):
-                        st.error("Username must be 3-30 characters and use only letters, numbers, or underscores.")
-                    elif not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', new_email):
-                        st.error("Enter a valid email address.")
-                    elif new_password != confirm_password: 
-                        st.error("Passwords do not match.")
-                    elif password_errors:
-                        for error in password_errors:
-                            st.error(error)
-                    elif db.get_user_by_username(new_username):
-                        st.error("Username or email is already registered. Please choose another.")
-                    elif db.get_user_by_email(new_email):
-                        st.error("Username or email is already registered. Please choose another.")
-                    elif db.create_user(new_username, new_email, new_password):
-                        st.session_state.signup_success = True
-                        for key in ["signup_user", "signup_email", "signup_pass", "signup_confirm"]:
-                            if key in st.session_state:
-                                del st.session_state[key]
+    _, auth_column, _ = st.columns([1, 1.35, 1])
+    with auth_column:
+        login_tab, signup_tab = st.tabs(["Login", "Sign Up"])
+        with login_tab:
+            with st.form("login_form"):
+                username = st.text_input("Username", key="login_user")
+                password = st.text_input("Password", type="password", key="login_pass")
+                if st.form_submit_button("Login", use_container_width=True):
+                    user = db.verify_user(username, password)
+                    if user:
+                        st.session_state.authenticated = True
+                        st.session_state.user = user
+                        if 'signup_success' in st.session_state:
+                            del st.session_state.signup_success
                         st.rerun()
                     else:
-                        username_exists = db.get_user_by_username(new_username)
-                        email_exists = db.get_user_by_email(new_email)
-                        if username_exists or email_exists:
+                        st.error("Invalid username or password.")
+
+        with signup_tab:
+            if st.session_state.get('signup_success'):
+                st.success("Account created successfully!")
+                st.info("Please switch to the Login tab to sign in with your new credentials.")
+            else:
+                with st.form("signup_form"):
+                    new_username = st.text_input("Username", key="signup_user")
+                    new_email = st.text_input("Email Address", key="signup_email")
+                    new_password = st.text_input("Password", type="password", key="signup_pass")
+                    confirm_password = st.text_input("Confirm Password", type="password", key="signup_confirm")
+                    render_password_requirements(new_password)
+
+                    if st.form_submit_button("Create Account", use_container_width=True):
+                        new_username = new_username.strip()
+                        new_email = new_email.strip().lower()
+                        password_errors = validate_password(new_password)
+                        if not new_username or not new_email or not new_password or not confirm_password:
+                            st.error("Please complete every field.")
+                        elif not re.match(r'^[a-zA-Z0-9_]{3,30}$', new_username):
+                            st.error("Username must be 3-30 characters and use only letters, numbers, or underscores.")
+                        elif not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', new_email):
+                            st.error("Enter a valid email address.")
+                        elif new_password != confirm_password:
+                            st.error("Passwords do not match.")
+                        elif password_errors:
+                            for error in password_errors:
+                                st.error(error)
+                        elif db.get_user_by_username(new_username) or db.get_user_by_email(new_email):
                             st.error("Username or email is already registered. Please choose another.")
+                        elif db.create_user(new_username, new_email, new_password):
+                            st.session_state.signup_success = True
+                            for key in ["signup_user", "signup_email", "signup_pass", "signup_confirm"]:
+                                if key in st.session_state:
+                                    del st.session_state[key]
+                            st.rerun()
                         else:
                             st.error("Account could not be created. Please try again.")
+
+def render_footer():
+    st.markdown('<div class="footer-bar">Copyright DataLoom</div>', unsafe_allow_html=True)
 
 def show_dashboard():
     user = st.session_state.user
@@ -342,6 +345,7 @@ def show_settings_page():
 def main():
     if not st.session_state.get('authenticated'): show_login_page()
     else: show_dashboard()
+    render_footer()
 
 if __name__ == "__main__":
     main()
