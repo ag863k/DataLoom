@@ -19,45 +19,45 @@ st.set_page_config(
 st.markdown("""
 <style>
     .stApp {
-        background: #f5f5f5;
-        color: #171717;
+        background: #0d1117;
+        color: #e6edf3;
     }
     .main-header {
-        background: #ffffff;
-        padding: 1.4rem 1.6rem; border-radius: 8px; color: #171717;
+        background: #161b22;
+        padding: 1.4rem 1.6rem; border-radius: 8px; color: #e6edf3;
         text-align: left; margin-bottom: 1.25rem;
-        border: 1px solid #d6d6d6; border-left: 4px solid #171717;
-        color: #171717; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: 1px solid #30363d; border-left: 4px solid #8b949e;
+        color: #e6edf3; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
     }
     .metric-card {
-        background: #ffffff;
+        background: #161b22;
         padding: 1rem; border-radius: 8px;
-        border: 1px solid #d6d6d6;
-        color: #171717; margin-bottom: 1rem;
+        border: 1px solid #30363d;
+        color: #e6edf3; margin-bottom: 1rem;
     }
-    .metric-card h3 { color: #666666; margin-bottom: 0.5rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; }
-    .metric-card h2 { color: #171717; margin: 0; font-size: 1.5rem; font-weight: bold; }
+    .metric-card h3 { color: #8b949e; margin-bottom: 0.5rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .metric-card h2 { color: #f0f6fc; margin: 0; font-size: 1.5rem; font-weight: bold; }
     .insight-card {
-        background: #ffffff;
-        padding: 0.8rem; border-radius: 6px; border-left: 3px solid #555555;
-        margin: 0.5rem 0; color: #333333; border-top: 1px solid #e1e1e1; border-right: 1px solid #e1e1e1; border-bottom: 1px solid #e1e1e1;
+        background: #161b22;
+        padding: 0.8rem; border-radius: 6px; border-left: 3px solid #8b949e;
+        margin: 0.5rem 0; color: #c9d1d9; border-top: 1px solid #30363d; border-right: 1px solid #30363d; border-bottom: 1px solid #30363d;
     }
     .stForm {
-        background: #ffffff; padding: 1.5rem; border-radius: 8px;
-        border: 1px solid #d6d6d6; margin: 1rem 0;
+        background: #161b22; padding: 1.5rem; border-radius: 8px;
+        border: 1px solid #30363d; margin: 1rem 0;
     }
-    .stButton > button, .stForm button { background: #171717 !important; color: #ffffff !important; border: 1px solid #171717 !important; border-radius: 6px !important; font-weight: 600; }
-    .stButton > button:hover, .stForm button:hover { background: #444444 !important; border-color: #444444 !important; }
-    .stTextInput > div > div > input { background: #ffffff !important; border: 1px solid #bdbdbd !important; color: #171717 !important; border-radius: 6px !important; }
-    .stTextInput > div > div > input:focus { border-color: #171717 !important; box-shadow: 0 0 0 1px #171717 !important; }
-    [data-testid="stSidebar"] { background: #202020; border-right: 1px solid #333333; color: #ffffff; }
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] { color: #ffffff; }
-    [data-testid="stMetric"] { background: #ffffff; border: 1px solid #d6d6d6; border-radius: 8px; padding: 1rem; }
-    [data-testid="stFileUploader"] { background: #ffffff; border: 1px dashed #999999; border-radius: 8px; padding: 0.5rem; }
-    .upload-helper { color: #666666; font-size: 0.9rem; margin: -0.5rem 0 1rem; }
-    .password-checklist { background: #f0f0f0; border: 1px solid #d0d0d0; border-radius: 6px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; color: #444444; font-size: 0.9rem; }
+    .stButton > button, .stForm button { background: #f2f2f2 !important; color: #000000 !important; border: 1px solid #f2f2f2 !important; border-radius: 6px !important; font-weight: 600; }
+    .stButton > button:hover, .stForm button:hover { background: #d8d8d8 !important; color: #000000 !important; border-color: #d8d8d8 !important; }
+    .stTextInput > div > div > input { background: #0d1117 !important; border: 1px solid #484f58 !important; color: #e6edf3 !important; border-radius: 6px !important; }
+    .stTextInput > div > div > input:focus { border-color: #8b949e !important; box-shadow: 0 0 0 1px #8b949e !important; }
+    [data-testid="stSidebar"] { background: #010409; border-right: 1px solid #21262d; color: #f0f6fc; }
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] { color: #f0f6fc; }
+    [data-testid="stMetric"] { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; }
+    [data-testid="stFileUploader"] { background: #161b22; border: 1px dashed #484f58; border-radius: 8px; padding: 0.5rem; }
+    .upload-helper { color: #8b949e; font-size: 0.9rem; margin: -0.5rem 0 1rem; }
+    .password-checklist { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; color: #8b949e; font-size: 0.9rem; }
     .password-checklist p { margin: 0.25rem 0; }
-    .password-checklist .valid { color: #222222; }
+    .password-checklist .valid { color: #f0f6fc; }
     .password-checklist .invalid { color: #888888; }
 </style>
 """, unsafe_allow_html=True)
