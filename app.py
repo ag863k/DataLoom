@@ -56,13 +56,15 @@ st.markdown("""
     .stButton > button, .stForm button { background: #fbda03 !important; color: #000000 !important; border: 1px solid #fbda03 !important; border-radius: 6px !important; font-weight: 600; }
     .stButton > button:hover, .stForm button:hover { background: #d9bb00 !important; color: #000000 !important; border-color: #d9bb00 !important; }
     [data-testid="stSidebar"] .stButton > button { background: #fbda03 !important; color: #000000 !important; border-color: #fbda03 !important; }
+    [data-testid="stSidebar"] .stButton > button p { color: #000000 !important; }
     .stTextInput > div > div > input { background: #130f0b !important; border: 1px solid #604624 !important; color: #f5eadc !important; border-radius: 6px !important; }
     .stTextInput > div > div > input:focus { border-color: #fbda03 !important; box-shadow: 0 0 0 1px #fbda03 !important; }
     [data-testid="stSidebar"] { background: #010409; border-right: 1px solid #242424; color: #f0f6fc; }
     [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] { color: #f0f6fc; }
     [data-testid="stMetric"] { background: #161b22; border: 1px solid #242424; border-radius: 8px; padding: 1rem; }
     [data-testid="stFileUploader"] { background: #161b22; border: 1px dashed #242424; border-radius: 8px; padding: 0.5rem; }
-    .upload-helper { color: #e0c09a; font-size: 0.9rem; margin: -0.5rem 0 1rem; }
+    .upload-helper { color: #ffffff; font-size: 0.9rem; margin: -0.5rem 0 1rem; }
+    .upload-helper a { color: #ffffff !important; text-decoration: underline; }
     .password-checklist { background: #21170e; border: 1px solid #4a351d; border-radius: 6px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; color: #e0c09a; font-size: 0.9rem; }
     .password-checklist p { margin: 0.25rem 0; }
     .password-checklist .valid { color: #f0f6fc; }
@@ -71,7 +73,7 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] { color: #f0f6fc; }
     .stTabs [aria-selected="true"] { color: #fbda03 !important; }
     .stTabs [data-baseweb="tab-highlight"] { background-color: #fbda03; }
-    .footer-bar { border-top: 1px solid #4a351d; color: #d7b488; font-size: 0.78rem; text-align: center; padding: 1rem 0 0.25rem; margin-top: 2.5rem; }
+    .footer-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: rgba(13, 13, 13, 0.94); border-top: 1px solid #4a351d; color: #ffffff; font-size: 0.78rem; text-align: center; padding: 0.7rem 0 0.55rem; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -250,7 +252,7 @@ def show_dashboard_page():
     else: st.info("No files uploaded. Go to 'Upload Data' to get started.")
 
 def show_upload_page():
-    st.subheader("Upload Data")
+    st.subheader("Add a dataset")
     st.markdown(
         '<p class="upload-helper">For additional files, refer to: '
         '<a href="https://mega.nz/folder/JF031ZrJ#2C1eypfC7u0aBZvF_mdYxA" target="_blank">Link</a></p>',
@@ -270,12 +272,12 @@ def show_upload_page():
             df = pd.read_csv(uploaded_file) if uploaded_file.name.lower().endswith('.csv') else pd.read_excel(uploaded_file)
             st.success(f"Successfully loaded `{uploaded_file.name}`")
             st.dataframe(df.head(), use_container_width=True)
-            if st.button("Upload Data", use_container_width=True, type="primary"):
-                with st.spinner("Compressing and saving..."):
-                    if db.save_user_file_with_data(st.session_state.user['id'], uploaded_file.name, df, uploaded_file.type):
-                        st.success(f"File saved successfully at {format_ist_timestamp(pd.Timestamp.now(tz='UTC'))}.")
-                        load_cached_file_data.clear()
-                    else: st.error("Failed to save the file.")
+            with st.spinner("Compressing and saving..."):
+                if db.save_user_file_with_data(st.session_state.user['id'], uploaded_file.name, df, uploaded_file.type):
+                    st.success(f"File uploaded successfully at {format_ist_timestamp(pd.Timestamp.now(tz='UTC'))}.")
+                    load_cached_file_data.clear()
+                else:
+                    st.error("Failed to upload the file.")
         except Exception as e: st.error(f"Error processing file: {e}")
 
 def display_analysis_ui(analyzer: DataAnalyzer, source_name: str):
