@@ -5,7 +5,7 @@ from typing import Optional, Dict, Any, List
 import os
 import base64
 import gzip
-import json
+from pathlib import Path
 
 try:
     import psycopg2
@@ -15,17 +15,20 @@ except ImportError:
     POSTGRES_AVAILABLE = False
 
 class DatabaseManager:
-    def __init__(self, db_path: str = "dataloom.db"):
-        self.db_path = db_path
+    def __init__(self, db_path: Optional[str] = None):
+        self.db_path = db_path or str(Path(__file__).resolve().parent / "dataloom.db")
         self.use_postgres = False
         self.engine = None
         
         try:
             import streamlit as st
-            if hasattr(st, 'secrets') and 'DATABASE_URL' in st.secrets:
+            database_url = os.getenv('DATABASE_URL')
+            if not database_url and hasattr(st, 'secrets') and 'DATABASE_URL' in st.secrets:
+                database_url = st.secrets['DATABASE_URL']
+            if database_url:
                 if POSTGRES_AVAILABLE:
                     try:
-                        self.database_url = st.secrets['DATABASE_URL']
+                        self.database_url = database_url
                         self.engine = create_engine(self.database_url)
                         with self.engine.connect() as conn:
                             conn.execute(text("SELECT 1"))
@@ -269,4 +272,25 @@ class DatabaseManager:
                     return dict(result) if result else None
         except Exception as e:
             print(f"Error fetching user by email: {e}")
+            return None
+
+    def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
+        username = username.lower().strip()
+        try:
+            if self.use_postgres:
+                with self.engine.connect() as conn:
+                    result = conn.execute(
+                        text('SELECT id, username, email FROM users WHERE username = :username'),
+                        {'username': username}
+                    ).fetchone()
+                    return result._asdict() if result else None
+            else:
+                with sqlite3.connect(self.db_path) as conn:
+                    conn.row_factory = sqlite3.Row
+                    cursor = conn.cursor()
+                    cursor.execute('SELECT id, username, email FROM users WHERE username = ?', (username,))
+                    result = cursor.fetchone()
+                    return dict(result) if result else None
+        except Exception as e:
+            print(f"Error fetching user by username: {e}")
             return None

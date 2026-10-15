@@ -81,7 +81,7 @@ DataLoom/
 │   └── favicon.ico      # Custom favicon for branding
 ├── .streamlit/          # Streamlit configuration
 │   ├── config.toml      # App configuration and theming
-│   └── secrets.toml     # Production secrets template
+│   └── secrets.toml.example # Production secrets template
 ├── sample_*.csv         # Sample datasets for testing
 └── README.md           # Project documentation
 ```
@@ -160,7 +160,21 @@ Your app will automatically:
 **Important Files for Deployment:**
 - `.stignore` - Excludes sample data from deployment (keeps it lightweight)
 - `.streamlit/config.toml` - App configuration and theming
-- `.streamlit/secrets.toml` - Production secrets (if needed)
+- `.streamlit/secrets.toml.example` - Production secrets template
+
+### Persistent Database on Streamlit Cloud
+
+SQLite is suitable for local development, but Streamlit Cloud instances can be
+recreated and should not be treated as permanent storage. For persistent users
+and uploaded files, add a PostgreSQL connection string in Streamlit Cloud
+Settings > Secrets. Do not commit the actual secrets file:
+
+```toml
+DATABASE_URL = "postgresql://username:password@host:5432/database"
+```
+
+The application automatically uses PostgreSQL when `DATABASE_URL` is present
+and falls back to a local SQLite database when it is not.
 
 #### 4. **Post-Deployment**
 - Your app will be available at: `https://yourusername-dataloom-app-xyz.streamlit.app`

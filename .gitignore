@@ -148,7 +148,9 @@ secrets*
 *.gpg
 *.enc
 
-# Note: .streamlit/secrets.toml is included as template but actual secrets should be added in Streamlit Cloud
+!.streamlit/secrets.toml.example
+
+# Add production secrets in Streamlit Cloud or a local .streamlit/secrets.toml file.
 
 # User uploaded files (exclude from deployment)
 temp_uploads/

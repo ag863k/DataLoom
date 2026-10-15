@@ -4,9 +4,10 @@ from database import DatabaseManager
 from data_analyzer import DataAnalyzer
 import plotly.express as px
 import re
+from html import escape
+from pathlib import Path
 from typing import List
 
-# --- PAGE CONFIGURATION ---
 st.set_page_config(
     page_title="DataLoom - Analytics Dashboard",
     page_icon=None,
@@ -14,44 +15,50 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- STYLING ---
 st.markdown("""
 <style>
     .stApp {
-        background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
-        color: #ffffff;
+        background: #111111;
+        color: #f2f2f2;
     }
     .main-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1.5rem; border-radius: 15px; color: white;
-        text-align: center; margin-bottom: 1rem;
-        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        background: #1b1b1b;
+        padding: 1.4rem 1.6rem; border-radius: 8px; color: #f5f5f5;
+        text-align: left; margin-bottom: 1.25rem;
+        border: 1px solid #333333; border-left: 4px solid #bdbdbd;
     }
     .metric-card {
-        background: linear-gradient(135deg, #2d2d44 0%, #3d3d5c 100%);
-        padding: 1rem; border-radius: 15px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: white; margin-bottom: 1rem;
+        background: #1c1c1c;
+        padding: 1rem; border-radius: 8px;
+        border: 1px solid #353535;
+        color: #f2f2f2; margin-bottom: 1rem;
     }
-    .metric-card h3 { color: #667eea; margin-bottom: 0.5rem; font-size: 0.9rem; }
+    .metric-card h3 { color: #a6a6a6; margin-bottom: 0.5rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; }
     .metric-card h2 { color: #ffffff; margin: 0; font-size: 1.5rem; font-weight: bold; }
     .insight-card {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        padding: 0.8rem; border-radius: 10px; border-left: 4px solid #4CAF50;
-        margin: 0.5rem 0; color: white;
+        background: #1c1c1c;
+        padding: 0.8rem; border-radius: 6px; border-left: 3px solid #8f8f8f;
+        margin: 0.5rem 0; color: #e6e6e6;
     }
     .stForm {
-        background: rgba(45, 45, 68, 0.3); padding: 1.5rem; border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.1); margin: 1rem 0;
+        background: #181818; padding: 1.5rem; border-radius: 8px;
+        border: 1px solid #333333; margin: 1rem 0;
     }
-    .stForm button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; border: none !important; }
-    .stTextInput > div > div > input { background: rgba(61, 61, 92, 0.8) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; color: white !important; border-radius: 8px !important; }
+    .stButton > button, .stForm button { background: #e6e6e6 !important; color: #111111 !important; border: 1px solid #e6e6e6 !important; border-radius: 6px !important; font-weight: 600; }
+    .stButton > button:hover, .stForm button:hover { background: #bdbdbd !important; border-color: #bdbdbd !important; }
+    .stTextInput > div > div > input { background: #242424 !important; border: 1px solid #4a4a4a !important; color: #f5f5f5 !important; border-radius: 6px !important; }
+    .stTextInput > div > div > input:focus { border-color: #bdbdbd !important; box-shadow: 0 0 0 1px #bdbdbd !important; }
+    [data-testid="stSidebar"] { background: #181818; border-right: 1px solid #303030; }
+    [data-testid="stMetric"] { background: #1c1c1c; border: 1px solid #353535; border-radius: 8px; padding: 1rem; }
+    [data-testid="stFileUploader"] { background: #1c1c1c; border: 1px dashed #555555; border-radius: 8px; padding: 0.5rem; }
+    .password-checklist { background: #202020; border: 1px solid #363636; border-radius: 6px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; color: #bdbdbd; font-size: 0.9rem; }
+    .password-checklist p { margin: 0.25rem 0; }
+    .password-checklist .valid { color: #d7d7d7; }
+    .password-checklist .invalid { color: #888888; }
 </style>
 """, unsafe_allow_html=True)
 
 
-# --- DATABASE & CACHE INITIALIZATION ---
 if 'db_manager' not in st.session_state:
     try:
         st.session_state.db_manager = DatabaseManager()
@@ -60,24 +67,27 @@ if 'db_manager' not in st.session_state:
         st.stop()
 db = st.session_state.db_manager
 
-# --- Caching Functions for Performance ---
 @st.cache_data
 def load_cached_file_data(file_id):
     return db.get_file_data(file_id)
 
 @st.cache_data
 def load_sample_df():
-    url = "https://raw.githubusercontent.com/ag863k/DataLoom/main/sample_data/sample_sales_data.csv"
+    local_path = Path(__file__).resolve().parent / "sample_sales_data.csv"
     try:
-        return pd.read_csv(url, encoding='latin1')
+        if local_path.exists():
+            return pd.read_csv(local_path, encoding='latin1')
+        return pd.read_csv(
+            "https://raw.githubusercontent.com/ag863k/DataLoom/main/sample_sales_data.csv",
+            encoding='latin1'
+        )
     except Exception as e:
-        st.error(f"Could not load sample data from GitHub. Error: {e}")
+        st.error(f"Could not load the sample dataset: {e}")
         return None
 
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
-# --- HELPER FUNCTIONS ---
 def validate_password(password: str) -> List[str]:
     """Validates password strength and returns a list of errors."""
     errors = []
@@ -93,9 +103,22 @@ def validate_password(password: str) -> List[str]:
         errors.append("Password must contain at least one special character.")
     return errors
 
-# --- AUTHENTICATION PAGES ---
+def render_password_requirements(password: str):
+    requirements = [
+        (len(password) >= 8, "At least 8 characters"),
+        (bool(re.search(r'[A-Z]', password)), "One uppercase letter"),
+        (bool(re.search(r'[a-z]', password)), "One lowercase letter"),
+        (bool(re.search(r'[0-9]', password)), "One number"),
+        (bool(re.search(r'[^A-Za-z0-9]', password)), "One special character"),
+    ]
+    checks = "".join(
+        f"<p class={'valid' if passed else 'invalid'}>{'&#10003;' if passed else '&#8226;'} {label}</p>"
+        for passed, label in requirements
+    )
+    st.markdown(f'<div class="password-checklist"><strong>Password requirements</strong>{checks}</div>', unsafe_allow_html=True)
+
 def show_login_page():
-    st.markdown('<div class="main-header"><h1>DataLoom</h1><p>Your Professional Analytics Dashboard</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>DataLoom</h1><p>Private, focused data analysis.</p></div>', unsafe_allow_html=True)
     
     login_tab, signup_tab = st.tabs(["Login", "Sign Up"])
     with login_tab:
@@ -118,41 +141,50 @@ def show_login_page():
             st.success("Account created successfully!")
             st.info("Please switch to the Login tab to sign in with your new credentials.")
         else:
-            with st.expander("View Password Requirements"):
-                st.markdown("- At least 8 characters long\n- Contains uppercase (A-Z) and lowercase (a-z) letters\n- Contains at least one number (0-9)\n- Contains at least one special character (e.g., !@#$%)")
             with st.form("signup_form"):
                 new_username = st.text_input("Username", key="signup_user")
                 new_email = st.text_input("Email Address", key="signup_email")
                 new_password = st.text_input("Password", type="password", key="signup_pass")
                 confirm_password = st.text_input("Confirm Password", type="password", key="signup_confirm")
-                
+                render_password_requirements(new_password)
+
                 if st.form_submit_button("Create Account", use_container_width=True):
+                    new_username = new_username.strip()
+                    new_email = new_email.strip().lower()
                     password_errors = validate_password(new_password)
-                    if not all([new_username, new_email, new_password, confirm_password]):
-                        st.error("Please fill all fields.")
+                    if not new_username or not new_email or not new_password or not confirm_password:
+                        st.error("Please complete every field.")
+                    elif not re.match(r'^[a-zA-Z0-9_]{3,30}$', new_username):
+                        st.error("Username must be 3-30 characters and use only letters, numbers, or underscores.")
+                    elif not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', new_email):
+                        st.error("Enter a valid email address.")
                     elif new_password != confirm_password: 
                         st.error("Passwords do not match.")
                     elif password_errors:
                         for error in password_errors:
                             st.error(error)
-                    elif not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', new_email):
-                        st.error("Invalid email address format.")
+                    elif db.get_user_by_username(new_username):
+                        st.error("Username or email is already registered. Please choose another.")
                     elif db.get_user_by_email(new_email):
-                        st.error("This email is already registered.")
+                        st.error("Username or email is already registered. Please choose another.")
                     elif db.create_user(new_username, new_email, new_password):
                         st.session_state.signup_success = True
                         for key in ["signup_user", "signup_email", "signup_pass", "signup_confirm"]:
                             if key in st.session_state:
                                 del st.session_state[key]
                         st.rerun()
-                    else: 
-                        st.error("Username already exists. Please choose another.")
+                    else:
+                        username_exists = db.get_user_by_username(new_username)
+                        email_exists = db.get_user_by_email(new_email)
+                        if username_exists or email_exists:
+                            st.error("Username or email is already registered. Please choose another.")
+                        else:
+                            st.error("Account could not be created. Please try again.")
 
-# --- MAIN APPLICATION PAGES ---
 def show_dashboard():
     user = st.session_state.user
     with st.sidebar:
-        st.markdown('<div style="text-align: center; padding-top: 1rem;"><h2 style="color: #667eea;">DataLoom</h2></div>', unsafe_allow_html=True)
+        st.markdown('<div style="text-align: center; padding-top: 1rem;"><h2 style="color: #f2f2f2;">DataLoom</h2></div>', unsafe_allow_html=True)
         st.markdown("---")
         page = st.radio("Navigation", ["Dashboard", "Upload Data", "Analytics", "Settings"], label_visibility="collapsed")
         st.markdown("---")
@@ -214,7 +246,12 @@ def display_analysis_ui(analyzer: DataAnalyzer, source_name: str):
     m_col3.metric("Missing Values", f"{summary['basic_info']['missing_values']:,}")
     st.subheader("Key Insights")
     for insight in analyzer.get_insights():
-        st.markdown(f"<div class='insight-card'><strong>{insight['type']}:</strong> {insight['message']}</div>", unsafe_allow_html=True)
+        insight_type = escape(str(insight['type']))
+        insight_message = escape(str(insight['message']))
+        st.markdown(
+            f"<div class='insight-card'><strong>{insight_type}:</strong> {insight_message}</div>",
+            unsafe_allow_html=True
+        )
     st.markdown("---")
     tab1, tab2, tab3 = st.tabs(["Visualizations", "Data Summary", "Export"])
     with tab1:
@@ -223,7 +260,7 @@ def display_analysis_ui(analyzer: DataAnalyzer, source_name: str):
             plot_type = st.selectbox("Choose plot type", ["Histogram", "Scatter Plot", "Box Plot"])
             if plot_type == "Histogram":
                 col = st.selectbox("Select column", analyzer.numeric_columns)
-                st.plotly_chart(px.histogram(df, x=col, title=f"Distribution of {col}", color_discrete_sequence=px.colors.sequential.Purples_r), use_container_width=True)
+                st.plotly_chart(px.histogram(df, x=col, title=f"Distribution of {col}", color_discrete_sequence=["#bdbdbd"]), use_container_width=True)
             elif plot_type == "Scatter Plot" and len(analyzer.numeric_columns) > 1:
                 x_ax, y_ax = st.columns(2)
                 x_col = x_ax.selectbox("X-axis", analyzer.numeric_columns, index=0)
@@ -278,7 +315,6 @@ def show_settings_page():
             else: st.error("Failed to delete file.")
     else: st.info("You have no uploaded files.")
 
-# --- MAIN CONTROLLER ---
 def main():
     if not st.session_state.get('authenticated'): show_login_page()
     else: show_dashboard()
