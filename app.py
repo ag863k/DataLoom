@@ -19,7 +19,7 @@ st.set_page_config(
 st.markdown("""
 <style>
     .stApp {
-        background: #0d1117;
+        background: #0D0D0D;
         color: #e6edf3;
     }
     .main-header {
@@ -48,14 +48,14 @@ st.markdown("""
     }
     .stButton > button, .stForm button { background: #f2f2f2 !important; color: #000000 !important; border: 1px solid #f2f2f2 !important; border-radius: 6px !important; font-weight: 600; }
     .stButton > button:hover, .stForm button:hover { background: #d8d8d8 !important; color: #000000 !important; border-color: #d8d8d8 !important; }
-    .stTextInput > div > div > input { background: #0d1117 !important; border: 1px solid #484f58 !important; color: #e6edf3 !important; border-radius: 6px !important; }
+    .stTextInput > div > div > input { background: #0D0D0D !important; border: 1px solid #484f58 !important; color: #e6edf3 !important; border-radius: 6px !important; }
     .stTextInput > div > div > input:focus { border-color: #8b949e !important; box-shadow: 0 0 0 1px #8b949e !important; }
     [data-testid="stSidebar"] { background: #010409; border-right: 1px solid #21262d; color: #f0f6fc; }
     [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] { color: #f0f6fc; }
     [data-testid="stMetric"] { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; }
     [data-testid="stFileUploader"] { background: #161b22; border: 1px dashed #484f58; border-radius: 8px; padding: 0.5rem; }
     .upload-helper { color: #8b949e; font-size: 0.9rem; margin: -0.5rem 0 1rem; }
-    .password-checklist { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; color: #8b949e; font-size: 0.9rem; }
+    .password-checklist { background: #0D0D0D; border: 1px solid #30363d; border-radius: 6px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; color: #8b949e; font-size: 0.9rem; }
     .password-checklist p { margin: 0.25rem 0; }
     .password-checklist .valid { color: #f0f6fc; }
     .password-checklist .invalid { color: #888888; }
