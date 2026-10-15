@@ -313,17 +313,21 @@ def show_upload_page():
                 return
             
             st.success(f"Successfully loaded `{uploaded_file.name}` ({len(df)} rows, {len(df.columns)} columns)")
-            st.dataframe(df.head(10), use_container_width=True)
             
-            if st.button("Save to My Files", type="primary", use_container_width=True):
-                with st.spinner("Compressing and saving..."):
-                    file_id = db.save_user_file_with_data(st.session_state.user['id'], uploaded_file.name, df, uploaded_file.type)
-                    if file_id:
-                        st.success(f"✅ File uploaded successfully at {format_ist_timestamp(pd.Timestamp.now(tz='UTC'))}.")
-                        load_cached_file_data.clear()
-                        st.balloons()
-                    else:
-                        st.error("❌ Failed to upload the file. Please try again.")
+            with st.container():
+                st.dataframe(df.head(10), use_container_width=True)
+                
+                col1, col2, col3 = st.columns([1, 2, 1])
+                with col2:
+                    if st.button("Save to My Files", type="primary", use_container_width=True, key="save_file_btn"):
+                        with st.spinner("Saving to database..."):
+                            file_id = db.save_user_file_with_data(st.session_state.user['id'], uploaded_file.name, df, uploaded_file.type)
+                            if file_id:
+                                st.success(f"File uploaded successfully at {format_ist_timestamp(pd.Timestamp.now(tz='UTC'))}.")
+                                load_cached_file_data.clear()
+                                st.rerun()
+                            else:
+                                st.error("Failed to upload the file. Please try again.")
         except pd.errors.EmptyDataError:
             st.error("The file is empty or corrupted. Please upload a valid file.")
         except pd.errors.ParserError:
@@ -379,25 +383,33 @@ def show_analytics_page():
     dataset_options.update({f"Uploaded file - {file['filename']}": file['id'] for file in user_files})
     
     if len(dataset_options) == 1:
-        st.info("💡 You haven't uploaded any files yet. Upload a file from the 'Upload Data' page or use the sample dataset.")
+        st.info("You haven't uploaded any files yet. Upload a file from the 'Upload Data' page or use the sample dataset.")
     
     selected_dataset = st.selectbox("Dataset", list(dataset_options), label_visibility="collapsed")
     selected_source = dataset_options[selected_dataset]
 
+    df_to_analyze = None
+    
     with st.spinner("Loading dataset..."):
         if selected_source == "sample_sales_data":
             df_to_analyze = load_sample_df()
             source_name = selected_source
         else:
-            df_to_analyze = load_cached_file_data(selected_source)
-            if df_to_analyze is None:
-                st.error("❌ The selected file could not be loaded. It may have been deleted or corrupted.")
-                st.info("Please select a different file or upload a new one.")
+            try:
+                df_to_analyze = db.get_file_data(selected_source)
+                if df_to_analyze is None or df_to_analyze.empty:
+                    st.error("The selected file could not be loaded. It may have been deleted or corrupted.")
+                    st.info("Please select a different file or upload a new one.")
+                    return
+                load_cached_file_data.clear()
+                source_name = selected_dataset.removeprefix("Uploaded file - ").rsplit('.', 1)[0]
+            except Exception as e:
+                st.error(f"Error loading file: {str(e)}")
+                st.info("Please try a different file or re-upload this file.")
                 return
-            source_name = selected_dataset.removeprefix("Uploaded file - ").rsplit('.', 1)[0]
 
-    if df_to_analyze is None:
-        st.error("❌ The sample dataset could not be loaded.")
+    if df_to_analyze is None or df_to_analyze.empty:
+        st.error("The sample dataset could not be loaded.")
         st.info("Please refresh the app or upload sample_sales_data.csv from the Upload Data page.")
         return
     

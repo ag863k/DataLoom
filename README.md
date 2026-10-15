@@ -166,15 +166,17 @@ git push origin main
 - Select your repository
 - Deploy
 
-### Production Database Setup
+### Production Database Setup (Supabase)
 
-For persistent data in production, add PostgreSQL:
+For persistent data storage, configure PostgreSQL:
 
-1. Get free PostgreSQL from Supabase or ElephantSQL
-2. In Streamlit Cloud Settings, add:
+1. In Streamlit Cloud Settings > Secrets, add:
 ```toml
-DATABASE_URL = "postgresql://username:password@host:5432/database"
+DATABASE_URL = "postgresql://postgres:YOUR_PASSWORD@db.dgmmtzatgkhhfbnnafnv.supabase.co:5432/postgres"
 ```
+
+2. Replace YOUR_PASSWORD with your actual Supabase password
+
 3. App automatically switches to PostgreSQL when DATABASE_URL is set
 
 ## License
