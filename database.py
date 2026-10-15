@@ -29,11 +29,16 @@ class DatabaseManager:
                 if POSTGRES_AVAILABLE:
                     try:
                         self.database_url = database_url
-                        self.engine = create_engine(self.database_url)
+                        self.engine = create_engine(
+                            self.database_url,
+                            pool_pre_ping=True,
+                            pool_recycle=300,
+                            connect_args={'connect_timeout': 10}
+                        )
                         with self.engine.connect() as conn:
                             conn.execute(text("SELECT 1"))
                         self.use_postgres = True
-                        print("Connection to PostgreSQL successful.")
+                        print("Connected to PostgreSQL successfully.")
                     except Exception as e:
                         print(f"PostgreSQL connection failed: {e}. Falling back to SQLite.")
                         self.use_postgres = False
@@ -223,24 +228,43 @@ class DatabaseManager:
             print(f"Error getting user files: {e}")
             return []
 
-    def get_file_data(self, file_id: int) -> Optional[pd.DataFrame]:
+    def get_file_data(self, file_id: int, user_id: Optional[int] = None) -> Optional[pd.DataFrame]:
         try:
+            result = None
             if self.use_postgres:
                 with self.engine.connect() as conn:
-                    result = conn.execute(text('SELECT compressed_data FROM user_files WHERE id = :id'), {'id': file_id}).scalar_one_or_none()
+                    if user_id:
+                        result = conn.execute(
+                            text('SELECT compressed_data FROM user_files WHERE id = :id AND user_id = :uid'), 
+                            {'id': file_id, 'uid': user_id}
+                        ).scalar_one_or_none()
+                    else:
+                        result = conn.execute(
+                            text('SELECT compressed_data FROM user_files WHERE id = :id'), 
+                            {'id': file_id}
+                        ).scalar_one_or_none()
             else:
                 with sqlite3.connect(self.db_path) as conn:
                     cursor = conn.cursor()
-                    cursor.execute('SELECT compressed_data FROM user_files WHERE id = ?', (file_id,))
+                    if user_id:
+                        cursor.execute('SELECT compressed_data FROM user_files WHERE id = ? AND user_id = ?', (file_id, user_id))
+                    else:
+                        cursor.execute('SELECT compressed_data FROM user_files WHERE id = ?', (file_id,))
                     result = cursor.fetchone()
                     if result:
                         result = result[0]
             
             if result:
-                return self.decompress_dataframe(result)
+                df = self.decompress_dataframe(result)
+                print(f"Successfully loaded file {file_id}, shape: {df.shape}")
+                return df
+            else:
+                print(f"No data found for file_id: {file_id}")
             return None
         except Exception as e:
-            print(f"Error getting file data: {e}")
+            print(f"Error getting file data for file_id {file_id}: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def delete_user_file(self, file_id: int, user_id: int) -> bool:

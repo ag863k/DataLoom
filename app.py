@@ -96,9 +96,9 @@ def format_ist_timestamp(value, date_only: bool = False) -> str:
     except (TypeError, ValueError, OverflowError):
         return str(value)
 
-@st.cache_data
-def load_cached_file_data(file_id):
-    return db.get_file_data(file_id)
+@st.cache_data(ttl=600)
+def load_cached_file_data(file_id, user_id):
+    return db.get_file_data(file_id, user_id)
 
 @st.cache_data
 def load_sample_df():
@@ -390,27 +390,40 @@ def show_analytics_page():
 
     df_to_analyze = None
     
-    with st.spinner("Loading dataset..."):
+    with st.spinner("Loading dataset from database..."):
         if selected_source == "sample_sales_data":
             df_to_analyze = load_sample_df()
             source_name = selected_source
         else:
             try:
-                df_to_analyze = db.get_file_data(selected_source)
-                if df_to_analyze is None or df_to_analyze.empty:
-                    st.error("The selected file could not be loaded. It may have been deleted or corrupted.")
-                    st.info("Please select a different file or upload a new one.")
+                df_to_analyze = db.get_file_data(selected_source, st.session_state.user['id'])
+                
+                if df_to_analyze is None:
+                    st.error("Unable to load the selected file from database.")
+                    
+                    with st.expander("Troubleshooting"):
+                        st.write("Possible causes:")
+                        st.write("1. Database connection issue (may be warming up)")
+                        st.write("2. File data is corrupted")
+                        st.write("3. File was uploaded in a different session")
+                        st.write("")
+                        st.write("**Solutions:**")
+                        st.write("- Wait a few seconds and try again (database may be activating)")
+                        st.write("- Re-upload the file from 'Upload Data' page")
+                        st.write("- Try a different file")
                     return
-                load_cached_file_data.clear()
+                elif df_to_analyze.empty:
+                    st.error("The file was loaded but contains no data.")
+                    return
+                
                 source_name = selected_dataset.removeprefix("Uploaded file - ").rsplit('.', 1)[0]
             except Exception as e:
                 st.error(f"Error loading file: {str(e)}")
-                st.info("Please try a different file or re-upload this file.")
+                st.info("The database may be waking up. Please wait 5 seconds and try again.")
                 return
 
     if df_to_analyze is None or df_to_analyze.empty:
-        st.error("The sample dataset could not be loaded.")
-        st.info("Please refresh the app or upload sample_sales_data.csv from the Upload Data page.")
+        st.error("The dataset could not be loaded.")
         return
     
     st.caption(f"Currently analyzing: {selected_dataset}")
