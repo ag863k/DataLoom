@@ -19,21 +19,18 @@ st.set_page_config(
 st.markdown("""
 <style>
     .stApp {
-        background: #0D0D0D;
+        background: radial-gradient(ellipse at 50% -12%, rgba(251, 218, 3, 0.16) 0%, rgba(13, 13, 13, 0) 42%), #0D0D0D;
         color: #e6edf3;
     }
     .block-container { max-width: 1200px; padding-top: 2.5rem; padding-bottom: 1rem; }
     .main-header {
-        background: #161b22;
-        padding: 1.2rem 1.6rem; border-radius: 8px; color: #f0f6fc;
-        text-align: center; margin: 0 auto 1.25rem;
-        border: 1px solid #242424; border-left: 4px solid #fbda03;
-        color: #f0f6fc; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+        background: transparent;
+        padding: 0; border: 0; color: #f0f6fc;
+        text-align: left; margin: 0 0 1.25rem;
+        box-shadow: none;
     }
-    .main-header h1, .main-header p { text-align: center; }
-    .main-header h1 { margin-bottom: 0.35rem; }
-    .main-header h1 { color: #fbda03; }
-    .main-header p { margin-bottom: 0; color: #f0f6fc; }
+    .main-header h1 { color: #fbda03; margin: 0; }
+    .brand-mark { color: #fbda03; font-size: 1.55rem; font-weight: 700; letter-spacing: 0.01em; text-align: center; margin: 0 0 2.5rem; text-shadow: 0 0 24px rgba(251, 218, 3, 0.28); }
     .auth-title { color: #f0f6fc; font-size: 2rem; font-weight: 700; text-align: center; margin: 0.5rem 0 0.2rem; }
     .auth-tagline { color: #f0f6fc; text-align: center; margin: 0 0 1.25rem; }
     .metric-card {
@@ -66,7 +63,10 @@ st.markdown("""
     .password-checklist p { margin: 0.25rem 0; }
     .password-checklist .valid { color: #f0f6fc; }
     .password-checklist .invalid { color: #f0f6fc; }
-    .stTabs [data-baseweb="tab-list"] { justify-content: center; }
+    .stTabs [data-baseweb="tab-list"] { justify-content: center; gap: 1.25rem; }
+    .stTabs [data-baseweb="tab"] { color: #f0f6fc; }
+    .stTabs [aria-selected="true"] { color: #fbda03 !important; }
+    .stTabs [data-baseweb="tab-highlight"] { background-color: #fbda03; }
     .footer-bar { border-top: 1px solid #242424; color: #f0f6fc; font-size: 0.78rem; text-align: center; padding: 1rem 0 0.25rem; margin-top: 2.5rem; }
 </style>
 """, unsafe_allow_html=True)
@@ -140,8 +140,8 @@ def render_password_requirements(password: str):
     st.markdown(f'<div class="password-checklist"><strong>Password requirements</strong>{checks}</div>', unsafe_allow_html=True)
 
 def show_login_page():
-    st.markdown('<div class="main-header"><h1>DataLoom</h1><p>Private, focused data analysis.</p></div>', unsafe_allow_html=True)
-    _, auth_column, _ = st.columns([1, 1.35, 1])
+    st.markdown('<div class="brand-mark">DataLoom</div>', unsafe_allow_html=True)
+    _, auth_column, _ = st.columns([1, 1.25, 1])
     with auth_column:
         login_tab, signup_tab = st.tabs(["Login", "Sign Up"])
         with login_tab:
@@ -160,7 +160,7 @@ def show_login_page():
                         st.error("Invalid username or password.")
 
         with signup_tab:
-            st.markdown('<div class="auth-title">Create an Account</div><p class="auth-tagline">Focused Data Analysis</p>', unsafe_allow_html=True)
+            st.markdown('<div class="auth-title">Create your account</div><p class="auth-tagline">Focused Data Analysis</p>', unsafe_allow_html=True)
             if st.session_state.get('signup_success'):
                 st.success("Account created successfully!")
                 st.info("Please switch to the Login tab to sign in with your new credentials.")
