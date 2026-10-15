@@ -103,6 +103,7 @@ def load_cached_file_data(file_id):
 @st.cache_data
 def load_sample_df():
     local_paths = [
+        Path(__file__).parent / "assets" / "sample_sales_data.csv",
         Path(__file__).parent / "sample_sales_data.csv",
         Path.cwd() / "sample_sales_data.csv",
     ]
