@@ -390,7 +390,7 @@ def show_analytics_page():
 
     df_to_analyze = None
     
-    with st.spinner("Loading dataset from database..."):
+    with st.spinner("Loading dataset..."):
         if selected_source == "sample_sales_data":
             df_to_analyze = load_sample_df()
             source_name = selected_source
@@ -400,31 +400,20 @@ def show_analytics_page():
                 df_to_analyze = load_cached_file_data(selected_source, user_id)
                 
                 if df_to_analyze is None:
-                    st.error("Unable to load the selected file from database.")
-                    
-                    with st.expander("Troubleshooting"):
-                        st.write("Possible causes:")
-                        st.write("1. Database connection issue (may be warming up)")
-                        st.write("2. File data is corrupted")
-                        st.write("3. File was uploaded in a different session")
-                        st.write("")
-                        st.write("**Solutions:**")
-                        st.write("- Wait a few seconds and try again (database may be activating)")
-                        st.write("- Re-upload the file from 'Upload Data' page")
-                        st.write("- Try a different file")
+                    st.error("File could not be loaded. Please re-upload the file.")
                     return
                 elif df_to_analyze.empty:
-                    st.error("The file was loaded but contains no data.")
+                    st.error("The file is empty.")
                     return
                 
                 source_name = selected_dataset.removeprefix("Uploaded file - ").rsplit('.', 1)[0]
             except Exception as e:
-                st.error(f"Error loading file: {str(e)}")
-                st.info("The database may be waking up. Please wait 5 seconds and try again.")
+                st.error(f"Error: {str(e)}")
+                st.info("Please re-upload the file from 'Upload Data' page.")
                 return
 
     if df_to_analyze is None or df_to_analyze.empty:
-        st.error("The dataset could not be loaded.")
+        st.error("Dataset could not be loaded.")
         return
     
     st.caption(f"Currently analyzing: {selected_dataset}")

@@ -8,10 +8,11 @@ import gzip
 from pathlib import Path
 
 try:
-    import psycopg2
     from sqlalchemy import create_engine, text
+    import psycopg2
     POSTGRES_AVAILABLE = True
-except ImportError:
+except ImportError as e:
+    print(f"PostgreSQL libraries not available: {e}")
     POSTGRES_AVAILABLE = False
 
 class DatabaseManager:
@@ -28,12 +29,11 @@ class DatabaseManager:
             if database_url:
                 if POSTGRES_AVAILABLE:
                     try:
-                        self.database_url = database_url
+                        self.database_url = database_url.replace('postgresql://', 'postgresql+psycopg2://')
                         self.engine = create_engine(
                             self.database_url,
                             pool_pre_ping=True,
-                            pool_recycle=300,
-                            connect_args={'connect_timeout': 10}
+                            pool_recycle=300
                         )
                         with self.engine.connect() as conn:
                             conn.execute(text("SELECT 1"))
@@ -255,16 +255,10 @@ class DatabaseManager:
                         result = result[0]
             
             if result:
-                df = self.decompress_dataframe(result)
-                print(f"Successfully loaded file {file_id}, shape: {df.shape}")
-                return df
-            else:
-                print(f"No data found for file_id: {file_id}")
+                return self.decompress_dataframe(result)
             return None
         except Exception as e:
-            print(f"Error getting file data for file_id {file_id}: {e}")
-            import traceback
-            traceback.print_exc()
+            print(f"Error loading file {file_id}: {e}")
             return None
 
     def delete_user_file(self, file_id: int, user_id: int) -> bool:
