@@ -19,10 +19,10 @@ st.set_page_config(
 st.markdown("""
 <style>
     .stApp {
-        background: #0D0D0D;
+        background: radial-gradient(ellipse at 50% 0%, rgba(251, 218, 3, 0.24) 0%, rgba(74, 48, 12, 0.18) 28%, rgba(13, 13, 13, 0) 68%), #0D0D0D;
         color: #e6edf3;
     }
-    .stApp::before { content: ""; position: fixed; inset: -18%; z-index: -1; background: radial-gradient(ellipse at 50% 18%, rgba(251, 218, 3, 0.52) 0%, rgba(251, 218, 3, 0.22) 24%, rgba(13, 13, 13, 0) 62%); filter: blur(90px); pointer-events: none; }
+    .stApp::before { content: ""; position: fixed; inset: -35%; z-index: 0; background: radial-gradient(ellipse at 50% 28%, rgba(251, 218, 3, 0.48) 0%, rgba(152, 97, 20, 0.26) 26%, rgba(13, 13, 13, 0) 66%); filter: blur(120px); pointer-events: none; }
     .block-container { max-width: 1200px; padding-top: 2.5rem; padding-bottom: 1rem; }
     .main-header {
         background: transparent;
@@ -49,28 +49,29 @@ st.markdown("""
         margin: 0.5rem 0; color: #f0f6fc; border-top: 1px solid #242424; border-right: 1px solid #242424; border-bottom: 1px solid #242424;
     }
     .stForm {
-        background: #161b22; padding: 1.5rem; border-radius: 8px;
-        border: 1px solid #242424; margin: 1rem 0;
+        background: rgba(31, 23, 15, 0.92); padding: 1.35rem; border-radius: 10px;
+        border: 1px solid #4a351d; margin: 1rem 0;
+        box-shadow: 0 16px 50px rgba(0, 0, 0, 0.22);
     }
     .stButton > button, .stForm button { background: #fbda03 !important; color: #000000 !important; border: 1px solid #fbda03 !important; border-radius: 6px !important; font-weight: 600; }
     .stButton > button:hover, .stForm button:hover { background: #d9bb00 !important; color: #000000 !important; border-color: #d9bb00 !important; }
     [data-testid="stSidebar"] .stButton > button { background: #fbda03 !important; color: #000000 !important; border-color: #fbda03 !important; }
-    .stTextInput > div > div > input { background: #0D0D0D !important; border: 1px solid #242424 !important; color: #e6edf3 !important; border-radius: 6px !important; }
+    .stTextInput > div > div > input { background: #130f0b !important; border: 1px solid #604624 !important; color: #f5eadc !important; border-radius: 6px !important; }
     .stTextInput > div > div > input:focus { border-color: #fbda03 !important; box-shadow: 0 0 0 1px #fbda03 !important; }
     [data-testid="stSidebar"] { background: #010409; border-right: 1px solid #242424; color: #f0f6fc; }
     [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] { color: #f0f6fc; }
     [data-testid="stMetric"] { background: #161b22; border: 1px solid #242424; border-radius: 8px; padding: 1rem; }
     [data-testid="stFileUploader"] { background: #161b22; border: 1px dashed #242424; border-radius: 8px; padding: 0.5rem; }
-    .upload-helper { color: #f0f6fc; font-size: 0.9rem; margin: -0.5rem 0 1rem; }
-    .password-checklist { background: #0D0D0D; border: 1px solid #242424; border-radius: 6px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; color: #f0f6fc; font-size: 0.9rem; }
+    .upload-helper { color: #e0c09a; font-size: 0.9rem; margin: -0.5rem 0 1rem; }
+    .password-checklist { background: #21170e; border: 1px solid #4a351d; border-radius: 6px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; color: #e0c09a; font-size: 0.9rem; }
     .password-checklist p { margin: 0.25rem 0; }
     .password-checklist .valid { color: #f0f6fc; }
-    .password-checklist .invalid { color: #f0f6fc; }
+    .password-checklist .invalid { color: #c79d6e; }
     .stTabs [data-baseweb="tab-list"] { justify-content: center; gap: 1.25rem; }
     .stTabs [data-baseweb="tab"] { color: #f0f6fc; }
     .stTabs [aria-selected="true"] { color: #fbda03 !important; }
     .stTabs [data-baseweb="tab-highlight"] { background-color: #fbda03; }
-    .footer-bar { border-top: 1px solid #242424; color: #f0f6fc; font-size: 0.78rem; text-align: center; padding: 1rem 0 0.25rem; margin-top: 2.5rem; }
+    .footer-bar { border-top: 1px solid #4a351d; color: #d7b488; font-size: 0.78rem; text-align: center; padding: 1rem 0 0.25rem; margin-top: 2.5rem; }
 </style>
 """, unsafe_allow_html=True)
 
