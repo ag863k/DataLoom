@@ -1,0 +1,7 @@
+customer_id,customer_type,age,city,lifetime_value,last_purchase_date
+C101,Premium,34,Mumbai,2450.75,2024-05-01
+C102,Regular,,Delhi,890.50,2024-05-03
+C103,,45,Bengaluru,3200.25,
+C104,Regular,31,,1250.00,2024-05-09
+C105,Premium,29,Pune,,2024-05-12
+C106,Regular,40,Chennai,1780.00,2024-05-15
