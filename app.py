@@ -396,7 +396,8 @@ def show_analytics_page():
             source_name = selected_source
         else:
             try:
-                df_to_analyze = db.get_file_data(selected_source, st.session_state.user['id'])
+                user_id = st.session_state.user['id']
+                df_to_analyze = load_cached_file_data(selected_source, user_id)
                 
                 if df_to_analyze is None:
                     st.error("Unable to load the selected file from database.")
