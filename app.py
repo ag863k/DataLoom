@@ -54,6 +54,7 @@ st.markdown("""
     }
     .stButton > button, .stForm button { background: #fbda03 !important; color: #000000 !important; border: 1px solid #fbda03 !important; border-radius: 6px !important; font-weight: 600; }
     .stButton > button:hover, .stForm button:hover { background: #d9bb00 !important; color: #000000 !important; border-color: #d9bb00 !important; }
+    [data-testid="stSidebar"] .stButton > button { background: #fbda03 !important; color: #000000 !important; border-color: #fbda03 !important; }
     .stTextInput > div > div > input { background: #0D0D0D !important; border: 1px solid #242424 !important; color: #e6edf3 !important; border-radius: 6px !important; }
     .stTextInput > div > div > input:focus { border-color: #fbda03 !important; box-shadow: 0 0 0 1px #fbda03 !important; }
     [data-testid="stSidebar"] { background: #010409; border-right: 1px solid #242424; color: #f0f6fc; }
@@ -98,10 +99,17 @@ def load_cached_file_data(file_id):
 
 @st.cache_data
 def load_sample_df():
-    local_path = Path(__file__).resolve().parent / "sample_sales_data.csv"
+    candidate_paths = [
+        Path(__file__).resolve().parent / "sample_sales_data.csv",
+        Path.cwd() / "sample_sales_data.csv",
+    ]
+    for sample_path in candidate_paths:
+        if sample_path.is_file():
+            try:
+                return pd.read_csv(sample_path, encoding='latin1')
+            except (OSError, ValueError, pd.errors.ParserError):
+                continue
     try:
-        if local_path.exists():
-            return pd.read_csv(local_path, encoding='latin1')
         return pd.read_csv(
             "https://raw.githubusercontent.com/ag863k/DataLoom/main/sample_sales_data.csv",
             encoding='latin1'
@@ -167,9 +175,27 @@ def show_login_page():
                 st.success("Account created successfully!")
                 st.info("Please switch to the Login tab to sign in with your new credentials.")
             else:
+                new_username = st.text_input("Username", key="signup_user")
+                username_value = new_username.strip()
+                if username_value and re.match(r'^[a-zA-Z0-9_]{3,30}$', username_value):
+                    if db.get_user_by_username(username_value):
+                        st.error("Username or email is already registered. Please choose another.")
+                    else:
+                        st.caption("Username is available.")
+                elif username_value:
+                    st.caption("Use 3-30 letters, numbers, or underscores.")
+
+                new_email = st.text_input("Email Address", key="signup_email")
+                email_value = new_email.strip().lower()
+                if email_value and re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email_value):
+                    if db.get_user_by_email(email_value):
+                        st.error("Username or email is already registered. Please choose another.")
+                    else:
+                        st.caption("Email is available.")
+                elif email_value:
+                    st.caption("Enter a valid email address.")
+
                 with st.form("signup_form"):
-                    new_username = st.text_input("Username", key="signup_user")
-                    new_email = st.text_input("Email Address", key="signup_email")
                     new_password = st.text_input("Password", type="password", key="signup_pass")
                     confirm_password = st.text_input("Confirm Password", type="password", key="signup_confirm")
                     render_password_requirements(new_password)
@@ -326,7 +352,7 @@ def show_analytics_page():
             source_name = selected_dataset.removeprefix("Uploaded file - ").rsplit('.', 1)[0]
 
     if df_to_analyze is None:
-        st.error("The sample dataset is unavailable. Please confirm sample_sales_data.csv is included in the deployment.")
+        st.error("The sample dataset could not be loaded. Refresh the app or upload sample_sales_data.csv from the Upload Data page.")
     else:
         st.caption(f"Currently analyzing: {selected_dataset}")
         display_analysis_ui(DataAnalyzer(df_to_analyze), source_name)
