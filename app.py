@@ -75,6 +75,7 @@ st.markdown("""
     .stTabs [data-baseweb="tab-highlight"] { background-color: #fbda03; }
     .footer-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: rgba(13, 13, 13, 0.94); border-top: 1px solid #4a351d; color: #ffffff; font-size: 0.78rem; text-align: center; padding: 0.7rem 0 0.55rem; }
     .stForm { max-width: 420px; }
+    .block-container { padding-bottom: 5rem; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -314,23 +315,24 @@ def show_upload_page():
             
             st.success(f"Successfully loaded `{uploaded_file.name}` ({len(df)} rows, {len(df.columns)} columns)")
             
-            st.markdown("<div style='margin: 1rem 0;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin: 1.5rem 0;'></div>", unsafe_allow_html=True)
             
-            with st.container():
-                st.dataframe(df.head(10), use_container_width=True)
-                
-                st.markdown("<div style='margin: 0.8rem 0;'></div>", unsafe_allow_html=True)
-                
-                col1, col2, col3 = st.columns([1, 1, 1])
-                with col2:
-                    if st.button("Save to My Files", type="primary", use_container_width=True, key="save_file_btn"):
-                        with st.spinner("Saving..."):
-                            file_id = db.save_user_file_with_data(st.session_state.user['id'], uploaded_file.name, df, uploaded_file.type)
-                            if file_id:
-                                st.success(f"File uploaded successfully at {format_ist_timestamp(pd.Timestamp.now(tz='UTC'))}.")
-                                st.rerun()
-                            else:
-                                st.error("Failed to upload the file. Please try again.")
+            st.dataframe(df.head(10), use_container_width=True)
+            
+            st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+            
+            col1, col2, col3 = st.columns([1, 1, 1])
+            with col2:
+                if st.button("Save to My Files", type="primary", use_container_width=True, key="save_file_btn"):
+                    with st.spinner("Saving..."):
+                        file_id = db.save_user_file_with_data(st.session_state.user['id'], uploaded_file.name, df, uploaded_file.type)
+                        if file_id:
+                            st.success(f"File uploaded successfully.")
+                            st.rerun()
+                        else:
+                            st.error("Failed to upload the file. Please try again.")
+            
+            st.markdown("<div style='margin: 3rem 0;'></div>", unsafe_allow_html=True)
         except pd.errors.EmptyDataError:
             st.error("The file is empty or corrupted. Please upload a valid file.")
         except pd.errors.ParserError:
