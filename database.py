@@ -1,314 +1,231 @@
-import sqlite3
 import bcrypt
 import pandas as pd
-from typing import Optional, Dict, Any, List
+import io
 import os
-import base64
-import gzip
-from pathlib import Path
+import psycopg2
+from urllib.parse import urlparse
+from typing import Optional, Dict, List
 
 try:
-    from sqlalchemy import create_engine, text
-    import psycopg2
-    POSTGRES_AVAILABLE = True
-except ImportError as e:
-    print(f"PostgreSQL libraries not available: {e}")
-    POSTGRES_AVAILABLE = False
+    from s3_storage import S3Storage
+    S3_AVAILABLE = True
+except ImportError:
+    S3_AVAILABLE = False
+
 
 class DatabaseManager:
-    def __init__(self, db_path: Optional[str] = None):
-        self.db_path = db_path or str(Path(__file__).resolve().parent / "dataloom.db")
-        self.use_postgres = False
-        self.engine = None
+    def __init__(self):
+        self.database_url = os.environ.get('DATABASE_URL')
+        if not self.database_url:
+            raise ValueError("DATABASE_URL environment variable is required")
         
-        try:
-            import streamlit as st
-            database_url = os.getenv('DATABASE_URL')
-            if not database_url and hasattr(st, 'secrets') and 'DATABASE_URL' in st.secrets:
-                database_url = st.secrets['DATABASE_URL']
-            if database_url:
-                if POSTGRES_AVAILABLE:
-                    try:
-                        self.database_url = database_url.replace('postgresql://', 'postgresql+psycopg2://')
-                        self.engine = create_engine(
-                            self.database_url,
-                            pool_pre_ping=True,
-                            pool_recycle=300
-                        )
-                        with self.engine.connect() as conn:
-                            conn.execute(text("SELECT 1"))
-                        self.use_postgres = True
-                        print("Connected to PostgreSQL successfully.")
-                    except Exception as e:
-                        print(f"PostgreSQL connection failed: {e}. Falling back to SQLite.")
-                        self.use_postgres = False
-                else:
-                    print("psycopg2 not available. Falling back to SQLite.")
-        except ImportError:
-            pass
+        self.s3_storage = None
+        if S3_AVAILABLE and os.environ.get('AWS_ACCESS_KEY_ID'):
+            try:
+                self.s3_storage = S3Storage()
+            except Exception:
+                pass
         
-        if not self.use_postgres:
-            print("Using local SQLite database.")
+        result = urlparse(self.database_url)
+        self.conn = psycopg2.connect(
+            database=result.path[1:],
+            user=result.username,
+            password=result.password,
+            host=result.hostname,
+            port=result.port
+        )
         
-        self.init_database()
-
-    def init_database(self):
-        if self.use_postgres:
-            self.init_postgres_database()
-        else:
-            self.init_sqlite_database()
-
-    def init_sqlite_database(self):
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT UNIQUE NOT NULL,
-                    email TEXT UNIQUE NOT NULL,
-                    password_hash TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    last_login TIMESTAMP
-                )
-            ''')
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS user_files (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER NOT NULL,
-                    filename TEXT NOT NULL,
-                    file_size INTEGER,
-                    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    rows_count INTEGER,
-                    columns_count INTEGER,
-                    file_type TEXT,
-                    compressed_data TEXT,
-                    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-                )
-            ''')
-
-    def init_postgres_database(self):
-        try:
-            with self.engine.begin() as conn:
-                conn.execute(text('''
-                    CREATE TABLE IF NOT EXISTS users (
-                        id SERIAL PRIMARY KEY,
-                        username VARCHAR(255) UNIQUE NOT NULL,
-                        email VARCHAR(255) UNIQUE NOT NULL,
-                        password_hash TEXT NOT NULL,
-                        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                        last_login TIMESTAMP WITH TIME ZONE
-                    )
-                '''))
-                conn.execute(text('''
-                    CREATE TABLE IF NOT EXISTS user_files (
-                        id SERIAL PRIMARY KEY,
-                        user_id INTEGER NOT NULL,
-                        filename VARCHAR(255) NOT NULL,
-                        file_size BIGINT,
-                        upload_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                        rows_count INTEGER,
-                        columns_count INTEGER,
-                        file_type VARCHAR(50),
-                        compressed_data TEXT,
-                        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-                    )
-                '''))
-            print("PostgreSQL tables initialized successfully.")
-        except Exception as e:
-            print(f"PostgreSQL table initialization failed: {e}")
-            raise
-
+        self._create_tables()
+    
+    def _create_tables(self):
+        cursor = self.conn.cursor()
+        
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(255) UNIQUE NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password_hash VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_files (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                filename VARCHAR(255) NOT NULL,
+                file_type VARCHAR(50),
+                rows_count INTEGER,
+                columns_count INTEGER,
+                upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                s3_key VARCHAR(512),
+                storage_type VARCHAR(20) DEFAULT 'database',
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        """)
+        
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS file_data (
+                id SERIAL PRIMARY KEY,
+                file_id INTEGER NOT NULL UNIQUE,
+                data_json TEXT NOT NULL,
+                FOREIGN KEY (file_id) REFERENCES user_files(id) ON DELETE CASCADE
+            )
+        """)
+        
+        self.conn.commit()
+    
     def create_user(self, username: str, email: str, password: str) -> bool:
-        username = username.lower().strip()
-        email = email.lower().strip()
-        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        
         try:
-            if self.use_postgres:
-                with self.engine.begin() as conn:
-                    conn.execute(text('INSERT INTO users (username, email, password_hash) VALUES (:u, :e, :p)'), 
-                                 {'u': username, 'e': email, 'p': password_hash})
-            else:
-                with sqlite3.connect(self.db_path) as conn:
-                    conn.execute('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
-                                 (username, email, password_hash))
+            password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            cursor = self.conn.cursor()
+            cursor.execute(
+                "INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s)",
+                (username, email, password_hash)
+            )
+            self.conn.commit()
             return True
         except Exception:
+            self.conn.rollback()
             return False
-
-    def verify_user(self, username: str, password: str) -> Optional[Dict[str, Any]]:
-        username = username.lower().strip()
-        user_data = None
-        try:
-            if self.use_postgres:
-                with self.engine.connect() as conn:
-                    result = conn.execute(text('SELECT * FROM users WHERE username = :u'), {'u': username}).fetchone()
-                    if result:
-                        user_data = result._asdict()
-            else:
-                with sqlite3.connect(self.db_path) as conn:
-                    conn.row_factory = sqlite3.Row
-                    cursor = conn.cursor()
-                    cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
-                    result = cursor.fetchone()
-                    if result:
-                        user_data = dict(result)
-            
-            if user_data and bcrypt.checkpw(password.encode('utf-8'), user_data['password_hash'].encode('utf-8')):
-                self.update_last_login(user_data['id'])
-                return user_data
-            
-            return None
-        except Exception as e:
-            print(f"Error verifying user: {e}")
-            return None
-
-    def update_last_login(self, user_id: int):
-        try:
-            if self.use_postgres:
-                with self.engine.begin() as conn:
-                    conn.execute(text('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = :id'), {'id': user_id})
-            else:
-                with sqlite3.connect(self.db_path) as conn:
-                    conn.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', (user_id,))
-        except Exception as e:
-            print(f"Error updating last login: {e}")
-
-    def compress_dataframe(self, df: pd.DataFrame) -> str:
-        json_str = df.to_json(orient='records')
-        compressed = gzip.compress(json_str.encode('utf-8'))
-        return base64.b64encode(compressed).decode('utf-8')
-
-    def decompress_dataframe(self, compressed_data: str) -> pd.DataFrame:
-        compressed = base64.b64decode(compressed_data.encode('utf-8'))
-        json_str = gzip.decompress(compressed).decode('utf-8')
-        return pd.read_json(json_str, orient='records')
-
+    
+    def verify_user(self, username: str, password: str) -> Optional[Dict]:
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "SELECT id, username, email, password_hash FROM users WHERE username = %s",
+            (username,)
+        )
+        user = cursor.fetchone()
+        
+        if user and bcrypt.checkpw(password.encode('utf-8'), user[3].encode('utf-8')):
+            return {'id': user[0], 'username': user[1], 'email': user[2]}
+        return None
+    
+    def get_user_by_username(self, username: str) -> Optional[Dict]:
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT id, username, email FROM users WHERE username = %s", (username,))
+        user = cursor.fetchone()
+        return {'id': user[0], 'username': user[1], 'email': user[2]} if user else None
+    
+    def get_user_by_email(self, email: str) -> Optional[Dict]:
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT id, username, email FROM users WHERE email = %s", (email,))
+        user = cursor.fetchone()
+        return {'id': user[0], 'username': user[1], 'email': user[2]} if user else None
+    
     def save_user_file_with_data(self, user_id: int, filename: str, df: pd.DataFrame, file_type: str) -> Optional[int]:
         try:
-            compressed_data = self.compress_dataframe(df)
-            file_size = len(compressed_data)
-            rows_count, columns_count = df.shape
+            cursor = self.conn.cursor()
+            use_s3 = self.s3_storage is not None
             
-            if self.use_postgres:
-                with self.engine.begin() as conn:
-                    result = conn.execute(text('''
-                        INSERT INTO user_files (user_id, filename, file_size, rows_count, columns_count, file_type, compressed_data)
-                        VALUES (:uid, :fname, :fsize, :rc, :cc, :ftype, :cdata) RETURNING id
-                    '''), {
-                        'uid': user_id, 'fname': filename, 'fsize': file_size, 'rc': rows_count,
-                        'cc': columns_count, 'ftype': file_type, 'cdata': compressed_data
-                    })
-                    return result.scalar_one_or_none()
+            cursor.execute(
+                """INSERT INTO user_files (user_id, filename, file_type, rows_count, columns_count, storage_type)
+                   VALUES (%s, %s, %s, %s, %s, %s) RETURNING id""",
+                (user_id, filename, file_type, len(df), len(df.columns), 's3' if use_s3 else 'database')
+            )
+            file_id = cursor.fetchone()[0]
+            
+            if use_s3:
+                s3_key = self.s3_storage.generate_file_key(user_id, file_id, filename)
+                csv_buffer = io.StringIO()
+                df.to_csv(csv_buffer, index=False)
+                file_bytes = csv_buffer.getvalue().encode('utf-8')
+                
+                if not self.s3_storage.upload_file(file_bytes, s3_key, file_type):
+                    raise Exception("S3 upload failed")
+                
+                cursor.execute(
+                    "UPDATE user_files SET s3_key = %s WHERE id = %s",
+                    (s3_key, file_id)
+                )
             else:
-                with sqlite3.connect(self.db_path) as conn:
-                    cursor = conn.cursor()
-                    cursor.execute('''
-                        INSERT INTO user_files (user_id, filename, file_size, rows_count, columns_count, file_type, compressed_data)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
-                    ''', (user_id, filename, file_size, rows_count, columns_count, file_type, compressed_data))
-                    return cursor.lastrowid
-        except Exception as e:
-            print(f"Error saving file: {e}")
+                data_json = df.to_json(orient='split', date_format='iso')
+                cursor.execute(
+                    "INSERT INTO file_data (file_id, data_json) VALUES (%s, %s)",
+                    (file_id, data_json)
+                )
+            
+            self.conn.commit()
+            return file_id
+        except Exception:
+            self.conn.rollback()
             return None
-
-    def get_user_files(self, user_id: int) -> List[Dict[str, Any]]:
+    
+    def get_user_files(self, user_id: int) -> List[Dict]:
+        cursor = self.conn.cursor()
+        cursor.execute(
+            """SELECT id, filename, file_type, rows_count, columns_count, upload_date, storage_type
+               FROM user_files WHERE user_id = %s ORDER BY upload_date DESC""",
+            (user_id,)
+        )
+        return [
+            {
+                'id': f[0],
+                'filename': f[1],
+                'file_type': f[2],
+                'rows_count': f[3],
+                'columns_count': f[4],
+                'upload_date': f[5],
+                'storage_type': f[6] if len(f) > 6 else 'database'
+            }
+            for f in cursor.fetchall()
+        ]
+    
+    def get_file_data(self, file_id: int, user_id: int) -> Optional[pd.DataFrame]:
         try:
-            if self.use_postgres:
-                with self.engine.connect() as conn:
-                    results = conn.execute(text('SELECT * FROM user_files WHERE user_id = :uid ORDER BY upload_date DESC'), {'uid': user_id}).fetchall()
-                    return [row._asdict() for row in results]
-            else:
-                with sqlite3.connect(self.db_path) as conn:
-                    conn.row_factory = sqlite3.Row
-                    cursor = conn.cursor()
-                    cursor.execute('SELECT * FROM user_files WHERE user_id = ? ORDER BY upload_date DESC', (user_id,))
-                    return [dict(row) for row in cursor.fetchall()]
-        except Exception as e:
-            print(f"Error getting user files: {e}")
-            return []
-
-    def get_file_data(self, file_id: int, user_id: Optional[int] = None) -> Optional[pd.DataFrame]:
-        try:
-            result = None
-            if self.use_postgres:
-                with self.engine.connect() as conn:
-                    if user_id:
-                        result = conn.execute(
-                            text('SELECT compressed_data FROM user_files WHERE id = :id AND user_id = :uid'), 
-                            {'id': file_id, 'uid': user_id}
-                        ).scalar_one_or_none()
-                    else:
-                        result = conn.execute(
-                            text('SELECT compressed_data FROM user_files WHERE id = :id'), 
-                            {'id': file_id}
-                        ).scalar_one_or_none()
-            else:
-                with sqlite3.connect(self.db_path) as conn:
-                    cursor = conn.cursor()
-                    if user_id:
-                        cursor.execute('SELECT compressed_data FROM user_files WHERE id = ? AND user_id = ?', (file_id, user_id))
-                    else:
-                        cursor.execute('SELECT compressed_data FROM user_files WHERE id = ?', (file_id,))
-                    result = cursor.fetchone()
-                    if result:
-                        result = result[0]
+            cursor = self.conn.cursor()
+            cursor.execute(
+                "SELECT id, storage_type, s3_key, filename FROM user_files WHERE id = %s AND user_id = %s",
+                (file_id, user_id)
+            )
+            file_info = cursor.fetchone()
+            if not file_info:
+                return None
             
+            storage_type = file_info[1] if len(file_info) > 1 else 'database'
+            s3_key = file_info[2] if len(file_info) > 2 else None
+            filename = file_info[3] if len(file_info) > 3 else 'file'
+            
+            if storage_type == 's3' and s3_key and self.s3_storage:
+                file_bytes = self.s3_storage.download_file(s3_key)
+                if file_bytes:
+                    if filename.lower().endswith('.csv'):
+                        return pd.read_csv(io.BytesIO(file_bytes))
+                    elif filename.lower().endswith(('.xlsx', '.xls')):
+                        return pd.read_excel(io.BytesIO(file_bytes))
+                    return pd.read_csv(io.BytesIO(file_bytes))
+            
+            cursor.execute("SELECT data_json FROM file_data WHERE file_id = %s", (file_id,))
+            result = cursor.fetchone()
             if result:
-                return self.decompress_dataframe(result)
+                return pd.read_json(io.StringIO(result[0]), orient='split')
             return None
-        except Exception as e:
-            print(f"Error loading file {file_id}: {e}")
+        except Exception:
             return None
-
+    
     def delete_user_file(self, file_id: int, user_id: int) -> bool:
         try:
-            if self.use_postgres:
-                with self.engine.begin() as conn:
-                    conn.execute(text('DELETE FROM user_files WHERE id = :fid AND user_id = :uid'), {'fid': file_id, 'uid': user_id})
-            else:
-                with sqlite3.connect(self.db_path) as conn:
-                    conn.execute('DELETE FROM user_files WHERE id = ? AND user_id = ?', (file_id, user_id))
-            return True
-        except Exception as e:
-            print(f"Error deleting file: {e}")
+            cursor = self.conn.cursor()
+            cursor.execute(
+                "SELECT storage_type, s3_key FROM user_files WHERE id = %s AND user_id = %s",
+                (file_id, user_id)
+            )
+            file_info = cursor.fetchone()
+            
+            if file_info and file_info[0] == 's3' and file_info[1] and self.s3_storage:
+                self.s3_storage.delete_file(file_info[1])
+            
+            cursor.execute(
+                "DELETE FROM user_files WHERE id = %s AND user_id = %s",
+                (file_id, user_id)
+            )
+            self.conn.commit()
+            return cursor.rowcount > 0
+        except Exception:
+            self.conn.rollback()
             return False
-
-    def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
-        email = email.lower().strip()
-        try:
-            if self.use_postgres:
-                with self.engine.connect() as conn:
-                    result = conn.execute(text('SELECT id, username, email FROM users WHERE email = :email'), {'email': email}).fetchone()
-                    return result._asdict() if result else None
-            else:
-                with sqlite3.connect(self.db_path) as conn:
-                    conn.row_factory = sqlite3.Row
-                    cursor = conn.cursor()
-                    cursor.execute('SELECT id, username, email FROM users WHERE email = ?', (email,))
-                    result = cursor.fetchone()
-                    return dict(result) if result else None
-        except Exception as e:
-            print(f"Error fetching user by email: {e}")
-            return None
-
-    def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
-        username = username.lower().strip()
-        try:
-            if self.use_postgres:
-                with self.engine.connect() as conn:
-                    result = conn.execute(
-                        text('SELECT id, username, email FROM users WHERE username = :username'),
-                        {'username': username}
-                    ).fetchone()
-                    return result._asdict() if result else None
-            else:
-                with sqlite3.connect(self.db_path) as conn:
-                    conn.row_factory = sqlite3.Row
-                    cursor = conn.cursor()
-                    cursor.execute('SELECT id, username, email FROM users WHERE username = ?', (username,))
-                    result = cursor.fetchone()
-                    return dict(result) if result else None
-        except Exception as e:
-            print(f"Error fetching user by username: {e}")
-            return None
+    
+    def close(self):
+        if self.conn:
+            self.conn.close()

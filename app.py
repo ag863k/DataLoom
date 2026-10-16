@@ -74,6 +74,7 @@ st.markdown("""
     .stTabs [aria-selected="true"] { color: #fbda03 !important; }
     .stTabs [data-baseweb="tab-highlight"] { background-color: #fbda03; }
     .footer-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: rgba(13, 13, 13, 0.94); border-top: 1px solid #4a351d; color: #ffffff; font-size: 0.78rem; text-align: center; padding: 0.7rem 0 0.55rem; }
+    .stForm { max-width: 420px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -96,7 +97,6 @@ def format_ist_timestamp(value, date_only: bool = False) -> str:
     except (TypeError, ValueError, OverflowError):
         return str(value)
 
-@st.cache_data(ttl=600)
 def load_cached_file_data(file_id, user_id):
     return db.get_file_data(file_id, user_id)
 
@@ -238,7 +238,7 @@ def show_login_page():
                             st.error("Account could not be created. Please try again.")
 
 def render_footer():
-    st.markdown('<div class="footer-bar">&copy; 2026 DataLoom. All rights reserved.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="footer-bar">&copy; 2024 DataLoom. All rights reserved.</div>', unsafe_allow_html=True)
 
 def show_dashboard():
     check_session_timeout()
