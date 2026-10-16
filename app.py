@@ -314,17 +314,20 @@ def show_upload_page():
             
             st.success(f"Successfully loaded `{uploaded_file.name}` ({len(df)} rows, {len(df.columns)} columns)")
             
+            st.markdown("<div style='margin: 1rem 0;'></div>", unsafe_allow_html=True)
+            
             with st.container():
                 st.dataframe(df.head(10), use_container_width=True)
                 
-                col1, col2, col3 = st.columns([1, 2, 1])
+                st.markdown("<div style='margin: 0.8rem 0;'></div>", unsafe_allow_html=True)
+                
+                col1, col2, col3 = st.columns([1, 1, 1])
                 with col2:
                     if st.button("Save to My Files", type="primary", use_container_width=True, key="save_file_btn"):
-                        with st.spinner("Saving to database..."):
+                        with st.spinner("Saving..."):
                             file_id = db.save_user_file_with_data(st.session_state.user['id'], uploaded_file.name, df, uploaded_file.type)
                             if file_id:
                                 st.success(f"File uploaded successfully at {format_ist_timestamp(pd.Timestamp.now(tz='UTC'))}.")
-                                load_cached_file_data.clear()
                                 st.rerun()
                             else:
                                 st.error("Failed to upload the file. Please try again.")
@@ -430,7 +433,6 @@ def show_settings_page():
         if st.button("Delete Selected File", type="secondary", use_container_width=True):
             file_id = next((f['id'] for f in user_files if f['filename'] == file_to_delete_name), None)
             if file_id and db.delete_user_file(file_id, st.session_state.user['id']):
-                load_cached_file_data.clear()
                 st.success(f"File '{file_to_delete_name}' has been deleted.")
                 st.rerun()
             else: st.error("Failed to delete file.")
