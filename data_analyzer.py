@@ -43,14 +43,19 @@ class DataAnalyzer:
             'financial': sum(1 for kw in financial_keywords if any(kw in col for col in col_names_lower)),
             'hr': sum(1 for kw in hr_keywords if any(kw in col for col in col_names_lower)),
             'inventory': sum(1 for kw in inventory_keywords if any(kw in col for col in col_names_lower)),
-            'marketing': sum(1 for kw in marketing_keywords if any(kw in col for col in col_names_lower))
+            'marketing': sum(1 for kw in marketing_keywords if any(kw in col for col in col_names_lower)),
+            'general': 0
         }
         
         if self.datetime_columns:
             scores['timeseries'] = len(self.datetime_columns) * 2
         
-        detected_type = max(scores, key=scores.get) if max(scores.values()) > 0 else 'general'
-        return detected_type if scores[detected_type] >= 2 else 'general'
+        max_score = max(scores.values())
+        if max_score < 2:
+            return 'general'
+        
+        detected_type = max(scores, key=scores.get)
+        return detected_type if detected_type != 'general' else 'general'
 
     def _identify_key_columns(self) -> Dict[str, List[str]]:
         keys = {
