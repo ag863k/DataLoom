@@ -1,24 +1,25 @@
 # DataLoom
 
-Data analytics dashboard with secure authentication and file management.
+Professional data analytics dashboard with secure authentication and cloud storage.
 
 ## Features
 
-- User authentication with bcrypt
+- Secure user authentication with bcrypt
 - CSV and Excel file upload
-- Interactive data analysis
-- Data visualization with Plotly
-- Multi-user support
-- S3-compatible file storage
-- PostgreSQL database
+- Interactive data analysis and visualization
+- Multi-user support with data isolation
+- S3-compatible cloud storage
+- PostgreSQL database backend
 
-## Requirements
+## Tech Stack
 
-- Python 3.8+
-- PostgreSQL database
-- S3-compatible storage
+- **Frontend:** Streamlit
+- **Database:** PostgreSQL
+- **Storage:** S3-compatible (dbrij, AWS S3, MinIO)
+- **Analytics:** Pandas, NumPy
+- **Visualization:** Plotly, Matplotlib, Seaborn
 
-## Installation
+## Quick Start
 
 ```bash
 git clone https://github.com/yourusername/DataLoom.git
@@ -27,31 +28,46 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## Streamlit Cloud Deployment
+## Deployment
 
-### Required Secrets
+### Streamlit Cloud
 
-Add in **App Settings → Secrets**:
+1. Push code to GitHub
+2. Connect repository at https://share.streamlit.io
+3. Configure secrets in **App Settings → Secrets**
+
+### Required Environment Variables
 
 ```toml
+# PostgreSQL Database
 DATABASE_URL = "postgresql://user:password@host:port/database"
-AWS_ACCESS_KEY_ID = "your_access_key"
-AWS_SECRET_ACCESS_KEY = "your_secret_key"
-S3_BUCKET_NAME = "your-bucket-name"
-S3_ENDPOINT_URL = "https://s3.example.com"
+
+# dbrij Storage
+DBRIJ_ACCESS_KEY_ID = "your_access_key"
+DBRIJ_SECRET_ACCESS_KEY = "your_secret_key"
+S3_BUCKET_NAME = "dataloom-bucket"
+S3_ENDPOINT_URL = "https://s3.dbrij.com"
 ```
 
-### Get PostgreSQL Database
+### Database Setup
 
-**Supabase (Free):**
-1. Go to https://supabase.com
-2. Create project
-3. Get connection string from Settings → Database
+**Option 1: Supabase (Free)**
+1. Create account at https://supabase.com
+2. Create new project
+3. Copy connection string from Settings → Database
 
-**Railway (Free):**
-1. Go to https://railway.app
+**Option 2: Railway (Free)**
+1. Create account at https://railway.app
 2. Add PostgreSQL service
-3. Copy DATABASE_URL from Variables
+3. Copy DATABASE_URL from Variables tab
+
+## Security
+
+- Bcrypt password hashing
+- Session timeout (30 minutes)
+- SQL injection prevention
+- User data isolation
+- Secure file storage
 
 ## License
 

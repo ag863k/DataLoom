@@ -7,18 +7,15 @@ from botocore.exceptions import ClientError
 
 
 class S3Storage:
-    """Handles file storage in S3-compatible storage"""
-    
     def __init__(self):
         self.bucket_name = os.environ.get('S3_BUCKET_NAME', 'dataloom-bucket')
         self.endpoint_url = os.environ.get('S3_ENDPOINT_URL', 'https://s3.dbrij.com')
         
-        # Get credentials from environment
-        access_key = os.environ.get('AWS_ACCESS_KEY_ID')
-        secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+        access_key = os.environ.get('DBRIJ_ACCESS_KEY_ID') or os.environ.get('AWS_ACCESS_KEY_ID')
+        secret_key = os.environ.get('DBRIJ_SECRET_ACCESS_KEY') or os.environ.get('AWS_SECRET_ACCESS_KEY')
         
         if not access_key or not secret_key:
-            raise ValueError("S3 credentials not configured")
+            raise ValueError("Storage credentials not configured")
         
         self.s3_client = boto3.client(
             's3',

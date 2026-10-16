@@ -20,7 +20,7 @@ class DatabaseManager:
             raise ValueError("DATABASE_URL environment variable is required")
         
         self.s3_storage = None
-        if S3_AVAILABLE and os.environ.get('AWS_ACCESS_KEY_ID'):
+        if S3_AVAILABLE and (os.environ.get('DBRIJ_ACCESS_KEY_ID') or os.environ.get('AWS_ACCESS_KEY_ID')):
             try:
                 self.s3_storage = S3Storage()
             except Exception:
@@ -64,6 +64,18 @@ class DatabaseManager:
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )
         """)
+        
+        try:
+            cursor.execute("""
+                ALTER TABLE user_files 
+                ADD COLUMN IF NOT EXISTS s3_key VARCHAR(512)
+            """)
+            cursor.execute("""
+                ALTER TABLE user_files 
+                ADD COLUMN IF NOT EXISTS storage_type VARCHAR(20) DEFAULT 'database'
+            """)
+        except Exception:
+            pass
         
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS file_data (
@@ -154,11 +166,33 @@ class DatabaseManager:
     
     def get_user_files(self, user_id: int) -> List[Dict]:
         cursor = self.conn.cursor()
-        cursor.execute(
-            """SELECT id, filename, file_type, rows_count, columns_count, upload_date, storage_type
-               FROM user_files WHERE user_id = %s ORDER BY upload_date DESC""",
-            (user_id,)
-        )
+        try:
+            cursor.execute(
+                """SELECT id, filename, file_type, rows_count, columns_count, upload_date, 
+                   COALESCE(storage_type, 'database') as storage_type
+                   FROM user_files WHERE user_id = %s ORDER BY upload_date DESC""",
+                (user_id,)
+            )
+        except Exception:
+            cursor.execute(
+                """SELECT id, filename, file_type, rows_count, columns_count, upload_date
+                   FROM user_files WHERE user_id = %s ORDER BY upload_date DESC""",
+                (user_id,)
+            )
+            files = cursor.fetchall()
+            return [
+                {
+                    'id': f[0],
+                    'filename': f[1],
+                    'file_type': f[2],
+                    'rows_count': f[3],
+                    'columns_count': f[4],
+                    'upload_date': f[5],
+                    'storage_type': 'database'
+                }
+                for f in files
+            ]
+        
         return [
             {
                 'id': f[0],
@@ -167,7 +201,7 @@ class DatabaseManager:
                 'rows_count': f[3],
                 'columns_count': f[4],
                 'upload_date': f[5],
-                'storage_type': f[6] if len(f) > 6 else 'database'
+                'storage_type': f[6]
             }
             for f in cursor.fetchall()
         ]
@@ -175,10 +209,28 @@ class DatabaseManager:
     def get_file_data(self, file_id: int, user_id: int) -> Optional[pd.DataFrame]:
         try:
             cursor = self.conn.cursor()
-            cursor.execute(
-                "SELECT id, storage_type, s3_key, filename FROM user_files WHERE id = %s AND user_id = %s",
-                (file_id, user_id)
-            )
+            try:
+                cursor.execute(
+                    "SELECT id, COALESCE(storage_type, 'database'), s3_key, filename FROM user_files WHERE id = %s AND user_id = %s",
+                    (file_id, user_id)
+                )
+            except Exception:
+                cursor.execute(
+                    "SELECT id, filename FROM user_files WHERE id = %s AND user_id = %s",
+                    (file_id, user_id)
+                )
+                file_info = cursor.fetchone()
+                if not file_info:
+                    return None
+                storage_type = 'database'
+                s3_key = None
+                filename = file_info[1] if len(file_info) > 1 else 'file'
+                cursor.execute("SELECT data_json FROM file_data WHERE file_id = %s", (file_id,))
+                result = cursor.fetchone()
+                if result:
+                    return pd.read_json(io.StringIO(result[0]), orient='split')
+                return None
+            
             file_info = cursor.fetchone()
             if not file_info:
                 return None
@@ -207,10 +259,25 @@ class DatabaseManager:
     def delete_user_file(self, file_id: int, user_id: int) -> bool:
         try:
             cursor = self.conn.cursor()
-            cursor.execute(
-                "SELECT storage_type, s3_key FROM user_files WHERE id = %s AND user_id = %s",
-                (file_id, user_id)
-            )
+            try:
+                cursor.execute(
+                    "SELECT COALESCE(storage_type, 'database'), s3_key FROM user_files WHERE id = %s AND user_id = %s",
+                    (file_id, user_id)
+                )
+            except Exception:
+                cursor.execute(
+                    "SELECT id FROM user_files WHERE id = %s AND user_id = %s",
+                    (file_id, user_id)
+                )
+                if cursor.fetchone():
+                    cursor.execute(
+                        "DELETE FROM user_files WHERE id = %s AND user_id = %s",
+                        (file_id, user_id)
+                    )
+                    self.conn.commit()
+                    return cursor.rowcount > 0
+                return False
+            
             file_info = cursor.fetchone()
             
             if file_info and file_info[0] == 's3' and file_info[1] and self.s3_storage:
