@@ -81,11 +81,8 @@ st.markdown("""
 
 
 if 'db_manager' not in st.session_state:
-    try:
-        st.session_state.db_manager = DatabaseManager()
-    except Exception as e:
-        st.error(f"Critical Database Error: {e}")
-        st.stop()
+    st.session_state.db_manager = DatabaseManager()
+
 db = st.session_state.db_manager
 IST = ZoneInfo("Asia/Kolkata")
 
@@ -106,26 +103,22 @@ def load_sample_df():
     local_paths = [
         Path(__file__).parent / "assets" / "sample_sales_data.csv",
         Path(__file__).parent / "sample_sales_data.csv",
-        Path.cwd() / "sample_sales_data.csv",
     ]
     for sample_path in local_paths:
         if sample_path.is_file():
             try:
                 return pd.read_csv(sample_path, encoding='latin1')
-            except (OSError, ValueError, pd.errors.ParserError):
+            except Exception:
                 continue
+    
     remote_urls = [
         "https://raw.githubusercontent.com/ag863k/DataLoom/main/sample_sales_data.csv",
-        "https://github.com/ag863k/DataLoom/raw/refs/heads/main/sample_sales_data.csv",
     ]
     for url in remote_urls:
         try:
-            sample_df = pd.read_csv(url, encoding='latin1')
-            if not sample_df.empty:
-                return sample_df
+            return pd.read_csv(url, encoding='latin1')
         except Exception:
             continue
-    st.error("Sample sales data could not be loaded from the bundled file or GitHub. Please refresh the app.")
     return None
 
 if 'authenticated' not in st.session_state:
@@ -165,15 +158,15 @@ def render_password_requirements(password: str):
     st.markdown(f'<div class="password-checklist"><strong>Password requirements</strong>{checks}</div>', unsafe_allow_html=True)
 
 def check_session_timeout():
-    """Check if the user session has expired due to inactivity."""
     if st.session_state.get('authenticated'):
         TIMEOUT_MINUTES = 30
         last_activity = st.session_state.get('last_activity')
         if last_activity:
             elapsed = (pd.Timestamp.now(tz='UTC') - last_activity).total_seconds() / 60
             if elapsed > TIMEOUT_MINUTES:
-                st.session_state.clear()
-                st.warning(f"Your session expired after {TIMEOUT_MINUTES} minutes of inactivity. Please login again.")
+                st.session_state.authenticated = False
+                st.session_state.user = None
+                st.warning(f"Session expired after {TIMEOUT_MINUTES} minutes of inactivity.")
                 st.rerun()
         st.session_state.last_activity = pd.Timestamp.now(tz='UTC')
 
@@ -254,8 +247,8 @@ def show_dashboard():
             session_duration = (pd.Timestamp.now(tz='UTC') - st.session_state.login_timestamp).total_seconds() / 60
             st.caption(f"Session: {int(session_duration)} min")
         if st.button("Logout", use_container_width=True):
-            st.session_state.clear()
-            st.success("You have been logged out successfully.")
+            st.session_state.authenticated = False
+            st.session_state.user = None
             st.rerun()
     st.markdown(f'<div class="main-header"><h1>{page}</h1></div>', unsafe_allow_html=True)
     pages = {"Dashboard": show_dashboard_page, "Upload Data": show_upload_page, "Analytics": show_analytics_page, "Settings": show_settings_page}
@@ -441,10 +434,9 @@ def show_settings_page():
     else: st.info("You have no uploaded files.")
 
 def main():
-    if not st.session_state.get('authenticated'): 
+    if not st.session_state.get('authenticated'):
         show_login_page()
-    else: 
-        check_session_timeout()
+    else:
         show_dashboard()
     render_footer()
 
