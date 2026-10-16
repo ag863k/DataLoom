@@ -320,7 +320,8 @@ def show_upload_page():
                     with st.spinner("Saving..."):
                         file_id = db.save_user_file_with_data(st.session_state.user['id'], uploaded_file.name, df, uploaded_file.type)
                         if file_id:
-                            st.success(f"File uploaded successfully.")
+                            st.success(f"✓ File added: **{uploaded_file.name}**")
+                            st.info(f"📊 {len(df):,} rows × {len(df.columns)} columns")
                             st.rerun()
                         else:
                             st.error("Failed to upload the file. Please try again.")
